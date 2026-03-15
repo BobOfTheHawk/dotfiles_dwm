@@ -1,0 +1,10 @@
+# compiled binaries
+dwm/dwm
+dwm/*.o
+dwm/*.orig
+dwm/*.rej
+dwm/*.diff
+slstatus/slstatus
+slstatus/*.o
+slstatus/components/*.o
+*.tar.gz

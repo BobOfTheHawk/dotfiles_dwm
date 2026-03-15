@@ -8,7 +8,7 @@ Built on Arch Linux, X11, no display manager.
 ## Quick install
 
 ```bash
-git clone https://github.com/bobofthehawk/dotfiles
+git clone https://github.com/BobOfTheHawk/dotfiles_dwm
 cd dotfiles
 bash install.sh
 ```
