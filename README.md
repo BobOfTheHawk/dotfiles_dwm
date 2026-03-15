@@ -9,7 +9,7 @@ Built on Arch Linux, X11, no display manager.
 
 ```bash
 git clone https://github.com/BobOfTheHawk/dotfiles_dwm
-cd dotfiles
+cd dotfiles_dwm
 bash install.sh
 ```
 
