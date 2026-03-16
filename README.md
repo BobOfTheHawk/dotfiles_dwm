@@ -38,6 +38,32 @@ If dwm or slstatus already exist it will update the configs and recompile instea
 
 ---
 
+## After install — fixing network and monitor
+
+### Network interface (slstatus shows n/a)
+
+Find your interface name:
+```
+ip link show
+```
+Look for a line starting with `w` (wifi) or `e` (ethernet), e.g. `wlo1` or `wlp6s0`.
+
+Then edit `~/slstatus/config.h` and replace `wlan0` with your interface name, then recompile:
+```
+cd ~/slstatus
+sudo make clean install
+pkill slstatus && slstatus &
+```
+
+### Wrong monitor output (xrandr line in xinitrc)
+
+Find your monitor name:
+```
+xrandr | grep " connected"
+```
+Then edit `~/.xinitrc` and replace `DP-4` with your output name (e.g. `HDMI-1`, `eDP-1`).
+Changes take effect on next `startx`.
+
 ## Stack
 
 | Role | Tool |
