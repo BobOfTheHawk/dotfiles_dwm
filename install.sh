@@ -145,6 +145,8 @@ sudo pacman -S --needed --noconfirm \
     clipmenu \
     thunar \
     thunar-volman \
+    thunar-archive-plugin \
+    file-roller \
     gvfs \
     yazi \
     picom \
