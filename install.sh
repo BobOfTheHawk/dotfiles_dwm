@@ -163,6 +163,7 @@ sudo pacman -S --needed --noconfirm \
     zip \
     p7zip \
     tar \
+    gvim \
     btop \
     man-db \
     man-pages \
