@@ -1,0 +1,97 @@
+{
+	"autosave": {
+  "after_delay": {
+   "milliseconds": 100
+  }
+ },
+ "outline_panel": {
+  "button": true
+ },
+ "git_panel": {
+  "scrollbar": {
+   "show": "auto"
+  }
+ },
+ "title_bar": {
+  
+ },
+ "diagnostics": {
+  "button": true
+ },
+ "terminal": {
+  "dock": "bottom",
+  "button": true
+ },
+ "status_bar": {
+  "cursor_position_button": false,
+  "active_language_button": true
+ },
+ "search": {
+  "whole_word": false
+ },
+ "image_viewer": {
+  "unit": "binary"
+ },
+ "minimap": {
+  "show": "never"
+ },
+ "drop_target_size": 0.2,
+ "vim": {
+  "toggle_relative_line_numbers": true
+ },
+ "relative_line_numbers": "enabled",
+ "rounded_selection": true,
+ "selection_highlight": true,
+ "unnecessary_code_fade": 0.4,
+ "cursor_shape": "bar",
+ "agent_ui_font_size": 12.0,
+ "agent_buffer_font_size": 12.0,
+ "ui_font_family": "JetBrainsMono Nerd Font",
+ "session": {
+  "trust_all_worktrees": true
+ },
+ "when_closing_with_no_tabs": "platform_default",
+ "theme": "Gruvbox Dark",
+	"icon_theme": "Catppuccin Mocha",
+
+	"base_keymap": "SublimeText",
+	"vim_mode": false,
+	"ui_font_size": 15.0,
+	"buffer_font_size": 16.0,
+	"buffer_line_height": "comfortable",
+	"buffer_font_family": "JetBrainsMono Nerd Font",
+
+	"buffer_font_features": {
+		"calt": false,
+	},
+	"buffer_font_weight": 450.0,
+
+	"toolbar": {
+		"breadcrumbs": false,
+		"quick_actions": false,
+		"selections_menu": true,
+	},
+	"project_panel": {
+		"sticky_scroll": true,
+  "hide_root": false,
+  "hide_hidden": false,
+  "auto_open": {
+   "on_create": true
+  },
+  "dock": "left",
+  "button": true,
+  "entry_spacing": "comfortable",
+	},
+	"tabs": {
+		"file_icons": true,
+	},
+	"git": {
+		"inline_blame": {
+			"enabled": false,
+		},
+	},
+	"format_on_save": "off",
+	"hard_tabs": true,
+	"tab_size": 4,
+	"current_line_highlight": "none",
+}
