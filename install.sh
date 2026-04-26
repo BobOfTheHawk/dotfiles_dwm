@@ -331,7 +331,6 @@ ok "xdg user dirs updated"
 
 sudo systemctl enable bluetooth 2>/dev/null && ok "Bluetooth enabled." || true
 
-fi
 if ! grep -q ".local/bin" "$HOME_DIR/.bashrc" 2>/dev/null; then
     echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME_DIR/.bashrc"
     ok "~/.local/bin added to .bashrc"
