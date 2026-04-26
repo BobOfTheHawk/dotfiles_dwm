@@ -1,10 +1,19 @@
 # compiled binaries
 dwm/dwm
+slstatus/slstatus
+
+# object files
 dwm/*.o
+slstatus/*.o
+slstatus/components/*.o
+
+# patch artifacts
 dwm/*.orig
 dwm/*.rej
 dwm/*.diff
-slstatus/slstatus
-slstatus/*.o
-slstatus/components/*.o
+slstatus/*.orig
+slstatus/*.rej
+
+# archives
 *.tar.gz
+*.zip

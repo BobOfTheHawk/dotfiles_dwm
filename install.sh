@@ -180,7 +180,17 @@ sudo pacman -S --needed --noconfirm \
     less \
     feh \
     mpv \
-    imv
+    imv \
+    zsh \
+    neovim \
+    zoxide \
+    fzf \
+    eza \
+    bat \
+    git-delta \
+    fastfetch \
+    fd \
+    tree
 
 ok "Apps done."
 
@@ -204,7 +214,7 @@ else
 fi
 
 info "Installing zed from AUR..."
-yay -S --needed --noconfirm zed
+yay -S --needed --noconfirm zed atuin pokemon-colorscripts-git
 ok "Zed installed."
 
 # ----------------------------------------------------------------
@@ -271,8 +281,34 @@ ok "picom.conf"
 mkdir -p "$HOME_DIR/.config/kitty"
 cp "$REPO/config/kitty/kitty.conf"          "$HOME_DIR/.config/kitty/kitty.conf"
 cp "$REPO/config/kitty/current-theme.conf"  "$HOME_DIR/.config/kitty/current-theme.conf"
-cp "$REPO/config/kitty/dark-theme_auto.conf" "$HOME_DIR/.config/kitty/dark-theme_auto.conf"
+cp "$REPO/config/kitty/dark-theme.auto.conf" "$HOME_DIR/.config/kitty/dark-theme_auto.conf"
 ok "kitty config (kitty.conf + Gruvbox Dark theme)"
+
+mkdir -p "$HOME_DIR/.config/zed"
+cp "$REPO/config/zed/settings.json" "$HOME_DIR/.config/zed/settings.json"
+ok "zed settings.json"
+
+# vim gruvbox colorscheme (uses vim built-in package manager, no vim-plug needed)
+info "Installing gruvbox for vim..."
+mkdir -p "$HOME_DIR/.vim/pack/plugins/start"
+if [ ! -d "$HOME_DIR/.vim/pack/plugins/start/gruvbox" ]; then
+    git clone https://github.com/morhetz/gruvbox.git "$HOME_DIR/.vim/pack/plugins/start/gruvbox"
+    ok "gruvbox vim colorscheme installed."
+else
+    ok "gruvbox already installed."
+fi
+
+cp "$REPO/home/.vimrc"  "$HOME_DIR/.vimrc"
+ok ".vimrc"
+
+cp "$REPO/home/.zshrc"  "$HOME_DIR/.zshrc"
+ok ".zshrc"
+
+# set zsh as default shell
+if [ "$SHELL" != "$(which zsh)" ]; then
+    chsh -s "$(which zsh)"
+    ok "Default shell set to zsh (takes effect on next login)"
+fi
 
 mkdir -p "$HOME_DIR/.local/bin"
 cp "$REPO/scripts/zed-launch.sh" "$HOME_DIR/.local/bin/zed-launch.sh"
@@ -290,10 +326,6 @@ ok "xdg user dirs updated"
 
 sudo systemctl enable bluetooth 2>/dev/null && ok "Bluetooth enabled." || true
 
-# PATH
-if ! grep -q ".local/bin" "$HOME_DIR/.zshrc" 2>/dev/null; then
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME_DIR/.zshrc"
-    ok "~/.local/bin added to .zshrc"
 fi
 if ! grep -q ".local/bin" "$HOME_DIR/.bashrc" 2>/dev/null; then
     echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME_DIR/.bashrc"
