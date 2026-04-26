@@ -191,15 +191,24 @@ Volume uses `pactl` directly because slstatus's built-in `vol_perc` uses ALSA an
 ## Autostart (xinitrc)
 
 ```bash
-xrdb ~/.Xresources          # DPI (144 = 1.5x for 2560x1600)
-xset r rate 300 30          # key repeat: 300ms delay, 30cps rate
-xrandr --output DP-4 ...    # force 165hz
-clipmenud                   # clipboard daemon
-picom                       # compositor
-slstatus                    # status bar
-lxpolkit                    # polkit agent
-xdg-desktop-portal-gtk      # file picker (needed by Zed)
-qutebrowser                 # browser → lands on tag 1
+/usr/lib/xdg-desktop-portal-gtk &
+xrdb ~/.Xresources
+
+# key repeat delay and rate
+xset r rate 300 30
+
+# monitor setup
+xrandr --output DP-4 --mode 2560x1600 --rate 165
+
+# mouse sensitivity
+/usr/bin/xinput set-prop 11 "Device Accel Constant Deceleration" 0.7
+
+export CLIPMENU_DMENU_OPTS="-l 10 -fn monospace:size=14"
+clipmenud &
+picom --config ~/.config/picom/picom.conf &
+slstatus &
+lxpolkit &
+qutebrowser &
 exec dwm
 ```
 
