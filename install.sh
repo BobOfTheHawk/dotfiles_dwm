@@ -288,6 +288,11 @@ mkdir -p "$HOME_DIR/.config/zed"
 cp "$REPO/config/zed/settings.json" "$HOME_DIR/.config/zed/settings.json"
 ok "zed settings.json"
 
+mkdir -p "$HOME_DIR/.config/fastfetch"
+cp "$REPO/config/fastfetch/config-pokemon.jsonc" "$HOME_DIR/.config/fastfetch/config-pokemon.jsonc"
+cp "$REPO/config/fastfetch/config.jsonc" "$HOME_DIR/.config/fastfetch/config.jsonc"
+ok "fastfetch configs"
+
 # vim gruvbox colorscheme (uses vim built-in package manager, no vim-plug needed)
 info "Installing gruvbox for vim..."
 mkdir -p "$HOME_DIR/.vim/pack/plugins/start"
