@@ -36,32 +36,36 @@ fi
 # ----------------------------------------------------------------
 # 1. DETECT GPU
 # ----------------------------------------------------------------
-section "1 / 7  Detecting GPU..."
+section "1 / 8  Detecting GPU..."
 
 GPU_PACKAGES=""
 GPU_INFO=$(lspci 2>/dev/null | grep -i "vga\|3d\|display" || echo "unknown")
 
 if echo "$GPU_INFO" | grep -qi "nvidia"; then
     info "NVIDIA GPU detected."
-    GPU_PACKAGES="nvidia nvidia-utils nvidia-settings"
-    ok "Will install: nvidia nvidia-utils nvidia-settings"
+    # linux-headers is REQUIRED for the nvidia kernel module to compile.
+    # nvidia-dkms is used instead of nvidia because it works across all
+    # kernel variants (linux, linux-lts, linux-zen, etc.) without needing
+    # to reinstall drivers after a kernel update.
+    GPU_PACKAGES="nvidia-dkms nvidia-utils nvidia-settings linux-headers"
+    ok "Will install: nvidia-dkms nvidia-utils nvidia-settings linux-headers"
 elif echo "$GPU_INFO" | grep -qi "amd\|radeon\|advanced micro"; then
     info "AMD GPU detected."
-    GPU_PACKAGES="xf86-video-amdgpu mesa vulkan-radeon libva-mesa-driver"
-    ok "Will install: xf86-video-amdgpu mesa vulkan-radeon"
+    GPU_PACKAGES="xf86-video-amdgpu mesa vulkan-radeon libva-mesa-driver linux-headers"
+    ok "Will install: xf86-video-amdgpu mesa vulkan-radeon linux-headers"
 elif echo "$GPU_INFO" | grep -qi "intel"; then
     info "Intel GPU detected."
-    GPU_PACKAGES="xf86-video-intel mesa vulkan-intel intel-media-driver"
-    ok "Will install: xf86-video-intel mesa vulkan-intel"
+    GPU_PACKAGES="xf86-video-intel mesa vulkan-intel intel-media-driver linux-headers"
+    ok "Will install: xf86-video-intel mesa vulkan-intel linux-headers"
 else
     info "GPU not detected or unknown — installing generic mesa."
-    GPU_PACKAGES="mesa"
+    GPU_PACKAGES="mesa linux-headers"
 fi
 
 # ----------------------------------------------------------------
 # 2. XORG + GPU
 # ----------------------------------------------------------------
-section "2 / 7  Installing Xorg..."
+section "2 / 8  Installing Xorg + GPU drivers..."
 
 sudo pacman -S --needed --noconfirm \
     xorg-server \
@@ -74,10 +78,14 @@ sudo pacman -S --needed --noconfirm \
 
 ok "Xorg + GPU done."
 
+# For NVIDIA: verify the module loaded correctly after install.
+# If 'nvidia-smi' works after reboot, you're good.
+# If not, check: journalctl -b | grep -i nvidia
+
 # ----------------------------------------------------------------
 # 3. AUDIO
 # ----------------------------------------------------------------
-section "3 / 7  Installing audio (PipeWire)..."
+section "3 / 8  Installing audio (PipeWire)..."
 
 sudo pacman -S --needed --noconfirm \
     pipewire \
@@ -94,7 +102,7 @@ ok "Audio done."
 # ----------------------------------------------------------------
 # 4. NETWORK
 # ----------------------------------------------------------------
-section "4 / 7  Installing network..."
+section "4 / 8  Installing network..."
 
 sudo pacman -S --needed --noconfirm \
     networkmanager \
@@ -112,15 +120,17 @@ ok "Network done."
 # ----------------------------------------------------------------
 # 5. FONTS
 # ----------------------------------------------------------------
-section "5 / 7  Installing fonts..."
+section "5 / 8  Installing fonts..."
 
+# ttf-jetbrains-mono-nerd is required — kitty.conf uses "JetBrainsMono Nerd Font".
+# ttf-jetbrains-mono (without nerd) will NOT render icons in the terminal.
 sudo pacman -S --needed --noconfirm \
     ttf-dejavu \
     ttf-liberation \
     noto-fonts \
     noto-fonts-emoji \
     noto-fonts-cjk \
-    ttf-jetbrains-mono \
+    ttf-jetbrains-mono-nerd \
     fontconfig
 
 ok "Fonts done."
@@ -128,7 +138,7 @@ ok "Fonts done."
 # ----------------------------------------------------------------
 # 6. APPS + TOOLS
 # ----------------------------------------------------------------
-section "6 / 7  Installing apps and tools..."
+section "6 / 8  Installing apps and tools..."
 
 sudo pacman -S --needed --noconfirm \
     base-devel \
@@ -175,9 +185,32 @@ sudo pacman -S --needed --noconfirm \
 ok "Apps done."
 
 # ----------------------------------------------------------------
-# 7. BUILD DWM + SLSTATUS
+# 7. ZED (AUR)
 # ----------------------------------------------------------------
-section "7 / 7  Building dwm + slstatus..."
+section "7 / 8  Installing Zed editor (AUR)..."
+
+# Zed is not in the official Arch repos — it requires an AUR helper.
+# This step installs yay if not present, then installs zed.
+if ! command -v yay &>/dev/null; then
+    info "yay not found — installing yay (AUR helper)..."
+    cd /tmp
+    git clone https://aur.archlinux.org/yay.git
+    cd yay
+    makepkg -si --noconfirm
+    cd "$REPO"
+    ok "yay installed."
+else
+    ok "yay already installed."
+fi
+
+info "Installing zed from AUR..."
+yay -S --needed --noconfirm zed
+ok "Zed installed."
+
+# ----------------------------------------------------------------
+# 8. BUILD DWM + SLSTATUS
+# ----------------------------------------------------------------
+section "8 / 8  Building dwm + slstatus..."
 
 # --- dwm ---
 DWM_DIR="$HOME_DIR/dwm"
@@ -231,6 +264,16 @@ mkdir -p "$HOME_DIR/.config/picom"
 cp "$REPO/config/picom/picom.conf" "$HOME_DIR/.config/picom/picom.conf"
 ok "picom.conf"
 
+# kitty — 3 files needed:
+#   kitty.conf         — main config (shell, keymaps, font, theme include)
+#   current-theme.conf — active theme (included by kitty.conf)
+#   dark-theme_auto.conf — gruvbox dark theme source
+mkdir -p "$HOME_DIR/.config/kitty"
+cp "$REPO/config/kitty/kitty.conf"          "$HOME_DIR/.config/kitty/kitty.conf"
+cp "$REPO/config/kitty/current-theme.conf"  "$HOME_DIR/.config/kitty/current-theme.conf"
+cp "$REPO/config/kitty/dark-theme_auto.conf" "$HOME_DIR/.config/kitty/dark-theme_auto.conf"
+ok "kitty config (kitty.conf + Gruvbox Dark theme)"
+
 mkdir -p "$HOME_DIR/.local/bin"
 cp "$REPO/scripts/zed-launch.sh" "$HOME_DIR/.local/bin/zed-launch.sh"
 chmod +x "$HOME_DIR/.local/bin/zed-launch.sh"
@@ -270,6 +313,9 @@ echo "  ⚠  Adjust these if your hardware differs:"
 echo "     ~/.xinitrc          → xrandr line (monitor output + resolution)"
 echo "     ~/slstatus/config.h → wlan0 (use enp109s0 if on ethernet)"
 echo "     ~/dwm/config.h      → /home/bobofthehawk/ in screenshot paths"
+echo ""
+echo "  NVIDIA note: after first boot run 'nvidia-smi' to confirm the"
+echo "  kernel module loaded. If it fails: journalctl -b | grep -i nvidia"
 echo ""
 echo "  GPU detected: $GPU_INFO"
 echo "================================================================"
