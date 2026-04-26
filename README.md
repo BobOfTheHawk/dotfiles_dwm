@@ -7,15 +7,15 @@ Built on Arch Linux, X11, no display manager.
 
 ## Quick install
 
-```bash
-git clone https://github.com/BobOfTheHawk/dotfiles_dwm
+```
+git clone https://github.com/bobofthehawk/dotfiles_dwm
 cd dotfiles_dwm
 bash install.sh
 ```
 
 Then reboot or log out, and from the TTY:
 
-```bash
+```
 startx
 ```
 
@@ -25,49 +25,25 @@ That's it. Everything is running.
 
 ## What install.sh does
 
-The script runs 6 steps automatically:
+The script runs 8 steps automatically:
 
-**1. Packages** — installs everything via pacman  
-**2. System setup** — enables NetworkManager, sets timezone to Asia/Tashkent  
-**3. dwm** — clones from suckless.org, applies patches, copies config, compiles  
-**4. slstatus** — clones from suckless.org, copies config, compiles  
-**5. Dotfiles** — copies all configs to correct locations  
-**6. Paths** — adds `~/.local/bin` to PATH  
+**1. GPU detection** — detects NVIDIA / AMD / Intel and selects the right drivers  
+**2. Xorg + GPU** — installs display server and GPU drivers  
+**3. Audio** — PipeWire + WirePlumber (enables user services automatically)  
+**4. Network** — NetworkManager (enabled automatically)  
+**5. Fonts** — includes `ttf-jetbrains-mono-nerd` (required for kitty icons)  
+**6. Apps** — all tools listed in the stack below  
+**7. Zed** — installed from AUR via yay (yay is installed automatically if missing)  
+**8. dwm + slstatus** — cloned from suckless.org, configs applied, compiled
 
 If dwm or slstatus already exist it will update the configs and recompile instead of cloning again.
 
 ---
 
-## After install — fixing network and monitor
-
-### Network interface (slstatus shows n/a)
-
-Find your interface name:
-```
-ip link show
-```
-Look for a line starting with `w` (wifi) or `e` (ethernet), e.g. `wlo1` or `wlp6s0`.
-
-Then edit `~/slstatus/config.h` and replace `wlan0` with your interface name, then recompile:
-```
-cd ~/slstatus
-sudo make clean install
-pkill slstatus && slstatus &
-```
-
-### Wrong monitor output (xrandr line in xinitrc)
-
-Find your monitor name:
-```
-xrandr | grep " connected"
-```
-Then edit `~/.xinitrc` and replace `DP-4` with your output name (e.g. `HDMI-1`, `eDP-1`).
-Changes take effect on next `startx`.
-
 ## Stack
 
 | Role | Tool |
-|------|------|
+| --- | --- |
 | Window manager | dwm 6.8 (from source) |
 | Status bar | slstatus (from source) |
 | Terminal | kitty |
@@ -79,43 +55,50 @@ Changes take effect on next `startx`.
 | Compositor | picom (tearing fix only, no animations) |
 | Clipboard | clipmenu (history persists across reboots) |
 | Screenshots | maim + xclip |
-| Polkit agent | lxpolkit (GUI root prompts) |
-
----
-
-## Packages installed
-
-```
-base-devel libx11 libxft libxinerama git
-dmenu kitty qutebrowser
-maim xclip clipmenu
-thunar yazi picom
-brightnessctl lxsession
-xdg-desktop-portal xdg-desktop-portal-gtk
-xorg-xset xorg-xrandr xorg-xrdb xorg-xinit
-networkmanager pipewire pipewire-pulse pavucontrol
-wget patch
-```
+| Polkit agent | lxpolkit (ships inside lxsession) |
 
 ---
 
 ## dwm patches
 
-Three patches are applied automatically by `install.sh`:
+dwm.c is shipped pre-patched — no patch files are applied at install time.
 
-| Patch | How | What it does |
-|-------|-----|-------------|
-| `hide_vacant_tags` | `patch -p1` from suckless.org | Hides empty tags from bar |
-| `togglefullscr` | Added manually to dwm.c via sed | True fullscreen — hides bar |
-| `center` | Already in dwm 6.8 | Floating windows open centered |
+| Patch | What it does |
+| --- | --- |
+| `hide_vacant_tags` | Hides empty tags from the bar |
+| `togglefullscr` | True fullscreen — hides bar |
+| `center` | Floating windows open centered (built into dwm 6.8) |
+
+---
+
+## NVIDIA note
+
+The script installs `nvidia-dkms` (not `nvidia`). This matters because:
+
+- `nvidia` only works with the exact kernel it was compiled for
+- `nvidia-dkms` rebuilds the kernel module automatically for any kernel update
+- `linux-headers` is also installed — without it, the DKMS build fails silently and X won't start
+
+After first boot, verify the driver loaded:
+
+```
+nvidia-smi
+```
+
+If it fails:
+
+```
+journalctl -b | grep -i nvidia
+```
 
 ---
 
 ## Keybindings
 
 ### Apps
+
 | Key | Action |
-|-----|--------|
+| --- | --- |
 | `Super + Enter` | Open kitty |
 | `Super + D` | dmenu launcher |
 | `Super + R` | Zed editor |
@@ -124,30 +107,34 @@ Three patches are applied automatically by `install.sh`:
 | `Super + C` | Clipboard history |
 
 ### Screenshots
+
 | Key | Action |
-|-----|--------|
+| --- | --- |
 | `Print` | Full screenshot → save + copy to clipboard |
 | `Super + Shift + S` | Region screenshot → save + copy to clipboard |
 
 Screenshots save to `~/Screenshots/screenshot-YYYY-MM-DD_HH-MM-SS.png`
 
 ### Volume
+
 | Key | Action |
-|-----|--------|
+| --- | --- |
 | `Volume Up` | +5% |
 | `Volume Down` | -5% |
 | `Mute` | Toggle mute |
 | `Mic Mute` | Toggle mic |
 
 ### Brightness
+
 | Key | Action |
-|-----|--------|
+| --- | --- |
 | `Brightness Up` | +5% |
 | `Brightness Down` | -5% |
 
 ### Window Management
+
 | Key | Action |
-|-----|--------|
+| --- | --- |
 | `Super + Q` | Close window |
 | `Super + Shift + Q` | Quit dwm |
 | `Super + B` | Toggle bar |
@@ -160,16 +147,18 @@ Screenshots save to `~/Screenshots/screenshot-YYYY-MM-DD_HH-MM-SS.png`
 | `Super + Shift + Space` | Toggle float |
 
 ### Layouts
+
 | Key | Action |
-|-----|--------|
+| --- | --- |
 | `Super + T` | Tile (default) |
 | `Super + Space` | Floating |
 | `Super + M` | Monocle (fullscreen, bar visible) |
 | `Super + F` | True fullscreen (bar hidden) |
 
 ### Tags
+
 | Key | Action |
-|-----|--------|
+| --- | --- |
 | `Super + 1-9` | Switch to tag |
 | `Super + Shift + 1-9` | Move window to tag |
 | `Super + 0` | View all tags |
@@ -190,25 +179,16 @@ Volume uses `pactl` directly because slstatus's built-in `vol_perc` uses ALSA an
 
 ## Autostart (xinitrc)
 
-```bash
-/usr/lib/xdg-desktop-portal-gtk &
-xrdb ~/.Xresources
-
-# key repeat delay and rate
-xset r rate 300 30
-
-# monitor setup
-xrandr --output DP-4 --mode 2560x1600 --rate 165
-
-# mouse sensitivity
-/usr/bin/xinput set-prop 11 "Device Accel Constant Deceleration" 0.7
-
-export CLIPMENU_DMENU_OPTS="-l 10 -fn monospace:size=14"
-clipmenud &
-picom --config ~/.config/picom/picom.conf &
-slstatus &
-lxpolkit &
-qutebrowser &
+```
+xrdb ~/.Xresources          # DPI (144 = 1.5x for 2560x1600)
+xset r rate 300 30          # key repeat: 300ms delay, 30cps rate
+xrandr --output DP-4 ...    # force 165hz
+clipmenud                   # clipboard daemon
+picom                       # compositor
+slstatus                    # status bar
+lxpolkit                    # polkit agent
+xdg-desktop-portal-gtk      # file picker (needed by Zed)
+qutebrowser                 # browser → lands on tag 1
 exec dwm
 ```
 
@@ -217,19 +197,24 @@ exec dwm
 ## Repo structure
 
 ```
-dotfiles/
+dotfiles_dwm/
 ├── README.md
 ├── install.sh                   ← run this
 ├── dwm/
-│   └── config.h                 ← keybinds, rules, colors
+│   ├── config.h                 ← keybinds, rules, colors
+│   └── dwm.c                    ← pre-patched source
 ├── slstatus/
 │   └── config.h                 ← bar: CPU, VOL, net, time
 ├── home/
 │   ├── .xinitrc                 ← autostart
 │   └── .Xresources              ← DPI scaling
 ├── config/
-│   └── picom/
-│       └── picom.conf           ← vsync only
+│   ├── picom/
+│   │   └── picom.conf           ← vsync only
+│   └── kitty/
+│       ├── kitty.conf           ← shell, keymaps, font, theme include
+│       ├── current-theme.conf   ← active theme (Gruvbox Dark)
+│       └── dark-theme_auto.conf ← Gruvbox Dark theme source
 └── scripts/
     └── zed-launch.sh            ← kills orphan zed before launch
 ```
@@ -239,18 +224,20 @@ dotfiles/
 ## After install — things to adjust for a different machine
 
 | File | What to change |
-|------|---------------|
+| --- | --- |
 | `home/.xinitrc` | `xrandr` line — monitor output name and resolution |
-| `slstatus/config.h` | `wlan0` → `enp109s0` if on ethernet |
+| `slstatus/config.h` | `wlan0` → your interface name (check with `ip link show`) |
 | `dwm/config.h` | `/home/bobofthehawk/` paths in screenshot commands |
 
 To find your monitor output name:
-```bash
+
+```
 xrandr | grep " connected"
 ```
 
 To find your network interface:
-```bash
+
+```
 ip link show | grep -E "^[0-9]"
 ```
 
@@ -259,31 +246,34 @@ ip link show | grep -E "^[0-9]"
 ## Rebuilding after config changes
 
 **dwm:**
-```bash
+
+```
 cd ~/dwm
-# edit config.h
+# edit config.h or dwm.c
 sudo make clean install
 Super+Shift+Q   # quit dwm
 startx          # relaunch
 ```
 
 **slstatus:**
-```bash
+
+```
 cd ~/slstatus
 # edit config.h
 sudo make clean install
-# kills and restarts automatically on next startx
-# or kill it and rerun: pkill slstatus && slstatus &
+pkill slstatus && slstatus &
 ```
 
 ---
 
 ## Known quirks
 
-**Volume shows n/a** — happens if PipeWire isn't running. Start it: `systemctl --user start pipewire pipewire-pulse`
+**Volume shows n/a** — happens if PipeWire isn't running. Start it: `systemctl --user start pipewire pipewire-pulse wireplumber`
 
 **Zed opens invisible** — the wrapper script `zed-launch.sh` handles this by killing the orphan `/usr/lib/zed/zed-editor` process before relaunching.
 
 **WiFi doesn't connect on boot** — run `sudo systemctl enable NetworkManager` if you skipped the installer.
 
 **Key repeat too slow/fast** — change `xset r rate 300 30` in `~/.xinitrc`. First number = delay (ms), second = repeat speed (chars/sec).
+
+**NVIDIA: X won't start after kernel update** — `nvidia-dkms` should rebuild automatically, but if it doesn't: `sudo dkms autoinstall`, then reboot.
