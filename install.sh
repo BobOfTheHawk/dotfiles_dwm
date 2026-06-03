@@ -16,12 +16,14 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
 ok()      { echo -e "${GREEN}  ✓ $1${NC}"; }
 info()    { echo -e "${YELLOW}  → $1${NC}"; }
 err()     { echo -e "${RED}  ✗ $1${NC}"; exit 1; }
-section() { echo -e "\n${BLUE}[ $1 ]${NC}"; }
+section() { echo -e "\n${BLUE}══════════════════════════════════════════\n  $1\n══════════════════════════════════════════${NC}"; }
+note()    { echo -e "${CYAN}  ⚑ $1${NC}"; }
 
 echo ""
 echo "================================================================"
@@ -36,7 +38,7 @@ fi
 # ----------------------------------------------------------------
 # 1. DETECT GPU
 # ----------------------------------------------------------------
-section "1 / 8  Detecting GPU..."
+section "1 / 10  Detecting GPU..."
 
 GPU_PACKAGES=""
 GPU_INFO=$(lspci 2>/dev/null | grep -i "vga\|3d\|display" || echo "unknown")
@@ -65,7 +67,7 @@ fi
 # ----------------------------------------------------------------
 # 2. XORG + GPU
 # ----------------------------------------------------------------
-section "2 / 8  Installing Xorg + GPU drivers..."
+section "2 / 10  Installing Xorg + GPU drivers..."
 
 sudo pacman -S --needed --noconfirm \
     xorg-server \
@@ -85,7 +87,7 @@ ok "Xorg + GPU done."
 # ----------------------------------------------------------------
 # 3. AUDIO
 # ----------------------------------------------------------------
-section "3 / 8  Installing audio (PipeWire)..."
+section "3 / 10  Installing audio (PipeWire)..."
 
 sudo pacman -S --needed --noconfirm \
     pipewire \
@@ -102,7 +104,7 @@ ok "Audio done."
 # ----------------------------------------------------------------
 # 4. NETWORK
 # ----------------------------------------------------------------
-section "4 / 8  Installing network..."
+section "4 / 10  Installing network..."
 
 sudo pacman -S --needed --noconfirm \
     networkmanager \
@@ -120,10 +122,11 @@ ok "Network done."
 # ----------------------------------------------------------------
 # 5. FONTS
 # ----------------------------------------------------------------
-section "5 / 8  Installing fonts..."
+section "5 / 10  Installing fonts..."
 
-# ttf-jetbrains-mono-nerd is required — kitty.conf uses "JetBrainsMono Nerd Font".
-# ttf-jetbrains-mono (without nerd) will NOT render icons in the terminal.
+# ttf-jetbrains-mono-nerd is required — kitty.conf and zed/settings.json
+# both use "JetBrainsMono Nerd Font". The non-nerd version will NOT
+# render icons in the terminal or Zed.
 sudo pacman -S --needed --noconfirm \
     ttf-dejavu \
     ttf-liberation \
@@ -138,7 +141,7 @@ ok "Fonts done."
 # ----------------------------------------------------------------
 # 6. APPS + TOOLS
 # ----------------------------------------------------------------
-section "6 / 8  Installing apps and tools..."
+section "6 / 10  Installing apps and tools..."
 
 sudo pacman -S --needed --noconfirm \
     base-devel \
@@ -190,17 +193,17 @@ sudo pacman -S --needed --noconfirm \
     git-delta \
     fastfetch \
     fd \
-    tree
+    tree \
+    go
 
 ok "Apps done."
 
 # ----------------------------------------------------------------
-# 7. ZED (AUR)
+# 7. AUR (yay + AUR packages)
 # ----------------------------------------------------------------
-section "7 / 8  Installing Zed editor (AUR)..."
+section "7 / 10  Installing AUR packages..."
 
-# Zed is not in the official Arch repos — it requires an AUR helper.
-# This step installs yay if not present, then installs zed.
+# Install yay if missing
 if ! command -v yay &>/dev/null; then
     info "yay not found — installing yay (AUR helper)..."
     cd /tmp
@@ -213,14 +216,17 @@ else
     ok "yay already installed."
 fi
 
-info "Installing zed from AUR..."
+info "Installing AUR packages..."
+# zed          — code editor (not in official repos)
+# atuin        — shell history with sync
+# pokemon-colorscripts-git — random pokemon art used in .zshrc fastfetch splash
 yay -S --needed --noconfirm zed atuin pokemon-colorscripts-git
-ok "Zed installed."
+ok "AUR packages done."
 
 # ----------------------------------------------------------------
 # 8. BUILD DWM + SLSTATUS
 # ----------------------------------------------------------------
-section "8 / 8  Building dwm + slstatus..."
+section "8 / 10  Building dwm + slstatus..."
 
 # --- dwm ---
 DWM_DIR="$HOME_DIR/dwm"
@@ -229,7 +235,7 @@ if [ ! -d "$DWM_DIR" ]; then
     info "Cloning dwm..."
     git clone https://git.suckless.org/dwm "$DWM_DIR"
 else
-    info "~/dwm exists, using repo's config and dwm.c..."
+    info "~/dwm exists — updating config and dwm.c..."
 fi
 
 info "Copying dwm config.h and dwm.c..."
@@ -248,7 +254,7 @@ if [ ! -d "$SLSTATUS_DIR" ]; then
     info "Cloning slstatus..."
     git clone https://git.suckless.org/slstatus "$SLSTATUS_DIR"
 else
-    info "~/slstatus exists, updating config only..."
+    info "~/slstatus exists — updating config..."
 fi
 
 info "Copying slstatus config.h..."
@@ -260,40 +266,27 @@ ok "slstatus built and installed."
 cd "$REPO"
 
 # ----------------------------------------------------------------
-# DOTFILES
+# 9. DOTFILES — home files
 # ----------------------------------------------------------------
-section "Copying dotfiles..."
+section "9 / 10  Copying dotfiles..."
 
+# .xinitrc + .Xresources
 cp "$REPO/home/.xinitrc"    "$HOME_DIR/.xinitrc"
 ok ".xinitrc"
 
 cp "$REPO/home/.Xresources" "$HOME_DIR/.Xresources"
 ok ".Xresources"
 
-mkdir -p "$HOME_DIR/.config/picom"
-cp "$REPO/config/picom/picom.conf" "$HOME_DIR/.config/picom/picom.conf"
-ok "picom.conf"
+# .zshrc
+cp "$REPO/home/.zshrc" "$HOME_DIR/.zshrc"
+ok ".zshrc"
 
-# kitty — 3 files needed:
-#   kitty.conf         — main config (shell, keymaps, font, theme include)
-#   current-theme.conf — active theme (included by kitty.conf)
-#   dark-theme_auto.conf — gruvbox dark theme source
-mkdir -p "$HOME_DIR/.config/kitty"
-cp "$REPO/config/kitty/kitty.conf"          "$HOME_DIR/.config/kitty/kitty.conf"
-cp "$REPO/config/kitty/current-theme.conf"  "$HOME_DIR/.config/kitty/current-theme.conf"
-cp "$REPO/config/kitty/dark-theme.auto.conf" "$HOME_DIR/.config/kitty/dark-theme_auto.conf"
-ok "kitty config (kitty.conf + Gruvbox Dark theme)"
+# .p10k.zsh — Powerlevel10k prompt config
+# (sourced by .zshrc via [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh)
+cp "$REPO/home/.p10k.zsh" "$HOME_DIR/.p10k.zsh"
+ok ".p10k.zsh"
 
-mkdir -p "$HOME_DIR/.config/zed"
-cp "$REPO/config/zed/settings.json" "$HOME_DIR/.config/zed/settings.json"
-ok "zed settings.json"
-
-mkdir -p "$HOME_DIR/.config/fastfetch"
-cp "$REPO/config/fastfetch/config-pokemon.jsonc" "$HOME_DIR/.config/fastfetch/config-pokemon.jsonc"
-cp "$REPO/config/fastfetch/config.jsonc" "$HOME_DIR/.config/fastfetch/config.jsonc"
-ok "fastfetch configs"
-
-# vim gruvbox colorscheme (uses vim built-in package manager, no vim-plug needed)
+# .vimrc + gruvbox colorscheme (uses vim built-in package manager)
 info "Installing gruvbox for vim..."
 mkdir -p "$HOME_DIR/.vim/pack/plugins/start"
 if [ ! -d "$HOME_DIR/.vim/pack/plugins/start/gruvbox" ]; then
@@ -302,12 +295,8 @@ if [ ! -d "$HOME_DIR/.vim/pack/plugins/start/gruvbox" ]; then
 else
     ok "gruvbox already installed."
 fi
-
-cp "$REPO/home/.vimrc"  "$HOME_DIR/.vimrc"
+cp "$REPO/home/.vimrc" "$HOME_DIR/.vimrc"
 ok ".vimrc"
-
-cp "$REPO/home/.zshrc"  "$HOME_DIR/.zshrc"
-ok ".zshrc"
 
 # set zsh as default shell
 if [ "$SHELL" != "$(which zsh)" ]; then
@@ -315,26 +304,99 @@ if [ "$SHELL" != "$(which zsh)" ]; then
     ok "Default shell set to zsh (takes effect on next login)"
 fi
 
+# ----------------------------------------------------------------
+# 10. DOTFILES — XDG config files
+# ----------------------------------------------------------------
+section "10 / 10  Copying XDG configs..."
+
+# picom
+mkdir -p "$HOME_DIR/.config/picom"
+cp "$REPO/config/picom/picom.conf" "$HOME_DIR/.config/picom/picom.conf"
+ok "picom.conf"
+
+# kitty — 3 files:
+#   kitty.conf          — main config (shell, keymaps, font, theme include)
+#   current-theme.conf  — active theme (included at bottom of kitty.conf)
+#   dark-theme.auto.conf — Gruvbox Dark color values
+mkdir -p "$HOME_DIR/.config/kitty"
+cp "$REPO/config/kitty/kitty.conf"           "$HOME_DIR/.config/kitty/kitty.conf"
+cp "$REPO/config/kitty/current-theme.conf"   "$HOME_DIR/.config/kitty/current-theme.conf"
+cp "$REPO/config/kitty/dark-theme.auto.conf" "$HOME_DIR/.config/kitty/dark-theme_auto.conf"
+ok "kitty (kitty.conf + Gruvbox Dark theme)"
+
+# zed
+mkdir -p "$HOME_DIR/.config/zed"
+cp "$REPO/config/zed/settings.json" "$HOME_DIR/.config/zed/settings.json"
+ok "zed settings.json"
+
+# fastfetch — two configs:
+#   config.jsonc         — full detailed fetch (used standalone with 'f' alias)
+#   config-pokemon.jsonc — compact fetch shown on every terminal open
+mkdir -p "$HOME_DIR/.config/fastfetch"
+cp "$REPO/config/fastfetch/config.jsonc"         "$HOME_DIR/.config/fastfetch/config.jsonc"
+cp "$REPO/config/fastfetch/config-pokemon.jsonc" "$HOME_DIR/.config/fastfetch/config-pokemon.jsonc"
+ok "fastfetch (config.jsonc + config-pokemon.jsonc)"
+
+# nvim
+# Lazy.nvim bootstraps itself on first launch — no pre-install needed.
+# Mason will auto-install LSP servers on first :Mason open or :MasonInstall.
+# Plugins: telescope, harpoon2, oil.nvim, mini.*, gopls, treesitter,
+#          trouble, noice, lualine, gitsigns, lazygit, fugitive, etc.
+# Note: 'go' package above is required for gopls to work.
+mkdir -p "$HOME_DIR/.config/nvim"
+cp -r "$REPO/config/nvim/." "$HOME_DIR/.config/nvim/"
+ok "nvim (full config — lazy.nvim will bootstrap on first launch)"
+
+# yazi
+# The repo ships both flavors directly, so no curl needed.
+#   flavors/gruvbox-dark.yazi  — active flavor (set in theme.toml)
+#   flavors/catppuccin-mocha.yazi — extra flavor included
+mkdir -p "$HOME_DIR/.config/yazi/flavors"
+cp "$REPO/config/yazi/yazi.toml" "$HOME_DIR/.config/yazi/yazi.toml"
+cp "$REPO/config/yazi/theme.toml" "$HOME_DIR/.config/yazi/theme.toml"
+cp -r "$REPO/config/yazi/flavors/gruvbox-dark.yazi"      "$HOME_DIR/.config/yazi/flavors/"
+cp -r "$REPO/config/yazi/flavors/catppuccin-mocha.yazi"  "$HOME_DIR/.config/yazi/flavors/"
+ok "yazi (yazi.toml + theme.toml + gruvbox-dark + catppuccin-mocha flavors)"
+
+# ----------------------------------------------------------------
+# MISC SETUP
+# ----------------------------------------------------------------
+
+# zed-launch script
 mkdir -p "$HOME_DIR/.local/bin"
 cp "$REPO/scripts/zed-launch.sh" "$HOME_DIR/.local/bin/zed-launch.sh"
 chmod +x "$HOME_DIR/.local/bin/zed-launch.sh"
-ok "zed-launch.sh"
+ok "zed-launch.sh → ~/.local/bin/"
 
+# ensure ~/.local/bin is on PATH in .bashrc (fallback for non-zsh sessions)
+if ! grep -q ".local/bin" "$HOME_DIR/.bashrc" 2>/dev/null; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME_DIR/.bashrc"
+    ok "~/.local/bin added to .bashrc"
+fi
+
+# create standard dirs
 mkdir -p "$HOME_DIR/Screenshots"
 ok "~/Screenshots"
 
 mkdir -p "$HOME_DIR/.cache/clipmenu"
 ok "~/.cache/clipmenu"
 
+# bootstrap zinit (used by .zshrc — clones itself on first zsh launch,
+# but we clone it now so the first shell open is instant)
+ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zinit/zinit.git"
+if [ ! -d "$ZINIT_HOME/.git" ]; then
+    info "Bootstrapping zinit..."
+    mkdir -p "$(dirname "$ZINIT_HOME")"
+    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+    ok "zinit cloned."
+else
+    ok "zinit already present."
+fi
+
 xdg-user-dirs-update 2>/dev/null || true
 ok "xdg user dirs updated"
 
 sudo systemctl enable bluetooth 2>/dev/null && ok "Bluetooth enabled." || true
-
-if ! grep -q ".local/bin" "$HOME_DIR/.bashrc" 2>/dev/null; then
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME_DIR/.bashrc"
-    ok "~/.local/bin added to .bashrc"
-fi
 
 # ----------------------------------------------------------------
 # DONE
@@ -345,12 +407,21 @@ echo -e "${GREEN}  All done!${NC}"
 echo ""
 echo "  Start dwm:   startx"
 echo ""
-echo "  ⚠  Adjust these if your hardware differs:"
-echo "     ~/.xinitrc          → xrandr line (monitor output + resolution)"
-echo "     ~/slstatus/config.h → wlan0 (use enp109s0 if on ethernet)"
-echo "     ~/dwm/config.h      → /home/bobofthehawk/ in screenshot paths"
+echo -e "${YELLOW}  ⚠  First launch notes:${NC}"
 echo ""
-echo "  NVIDIA note: after first boot run 'nvidia-smi' to confirm the"
+echo "  nvim         — open it once; lazy.nvim will auto-install all"
+echo "                 plugins. Then run :Mason to install LSP servers."
+echo "  zsh          — first open will compile zinit plugins (one-time)."
+echo "                 Subsequent opens will be instant."
+echo ""
+echo -e "${YELLOW}  ⚠  Adjust for your hardware:${NC}"
+echo ""
+echo "  ~/.xinitrc          → xrandr line (monitor output + resolution)"
+echo "  ~/slstatus/config.h → network interface (default: wlan0)"
+echo "                        check yours: ip link show | grep -E '^[0-9]'"
+echo "  ~/dwm/config.h      → /home/bobofthehawk/ in screenshot paths"
+echo ""
+echo "  NVIDIA: after first boot run 'nvidia-smi' to confirm the"
 echo "  kernel module loaded. If it fails: journalctl -b | grep -i nvidia"
 echo ""
 echo "  GPU detected: $GPU_INFO"

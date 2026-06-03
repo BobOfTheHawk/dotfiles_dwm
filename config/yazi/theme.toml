@@ -1,0 +1,12 @@
+[flavor]
+dark = "gruvbox-dark"
+
+[icon]
+rules = [
+  { name = "*/",         text = "󰉋" },
+  { name = "Downloads/", text = "󰇚" },
+  { name = "Documents/", text = "󰈙" },
+  { name = "Pictures/",  text = "󰋩" },
+  { name = ".git/",      text = "󰊢" },
+  { name = "Music/",     text = "󱍙" },
+]
