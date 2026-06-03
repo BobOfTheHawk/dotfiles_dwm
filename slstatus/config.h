@@ -13,7 +13,7 @@ static const struct arg args[] = {
 	/* function       format          argument */
 	{ cpu_perc,       " CPU %s%%  ",  NULL },
 	{ run_command,    " VOL %s%%  ",  "pactl get-sink-volume @DEFAULT_SINK@ | grep -oP '[0-9]+(?=%)' | head -1" },
-	{ netspeed_rx,    " ↓ %s  ",      "wlan0" },
-	{ netspeed_tx,    " ↑ %s  ",      "wlan0" },
+	{ netspeed_rx,    " ↓ %s  ",      "IFACE_PLACEHOLDER" },
+	{ netspeed_tx,    " ↑ %s  ",      "IFACE_PLACEHOLDER" },
 	{ datetime,       " %s ",         "%a %d %b  %H:%M" },
 };

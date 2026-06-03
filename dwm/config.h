@@ -65,7 +65,7 @@ static const char *termcmd[]     = { "kitty", NULL };
 static const char *clipmenucmd[] = { "clipmenu", NULL };
 static const char *thunarcmd[]   = { "thunar", NULL };
 static const char *yazicmd[]     = { "kitty", "-e", "yazi", NULL };
-static const char *zedcmd[] = { "/home/bobofthehawk/.local/bin/zed-launch.sh", NULL };
+static const char *zedcmd[] = { "HOME_PLACEHOLDER/.local/bin/zed-launch.sh", NULL };
 
 static const Key keys[] = {
 	/* modifier                     key                       function        argument */
@@ -79,8 +79,8 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_c,                     spawn,          {.v = clipmenucmd } },              /* Super+C:           clipboard history */
 
 	/* --- screenshots --- */
-	{ 0,                            XK_Print,                 spawn,          SHCMD("f=/home/bobofthehawk/Screenshots/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png; maim $f && xclip -selection clipboard -t image/png < $f") },             /* Print:             full screenshot */
-	{ MODKEY|ShiftMask,             XK_s,                     spawn,          SHCMD("f=/home/bobofthehawk/Screenshots/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png; maim -s $f && xclip -selection clipboard -t image/png < $f") },         /* Super+Shift+S:     region screenshot */
+	{ 0,                            XK_Print,                 spawn,          SHCMD("f=HOME_PLACEHOLDER/Screenshots/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png; maim $f && xclip -selection clipboard -t image/png < $f") },             /* Print:             full screenshot */
+	{ MODKEY|ShiftMask,             XK_s,                     spawn,          SHCMD("f=HOME_PLACEHOLDER/Screenshots/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png; maim -s $f && xclip -selection clipboard -t image/png < $f") },         /* Super+Shift+S:     region screenshot */
 
 	/* --- volume --- */
 	{ 0,                            XF86XK_AudioRaiseVolume,  spawn,          SHCMD("pactl set-sink-volume @DEFAULT_SINK@ +5%") },

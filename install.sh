@@ -238,9 +238,22 @@ else
     info "~/dwm exists — updating config and dwm.c..."
 fi
 
+# detect the real wireless/ethernet interface
+# prefer wireless (starts with 'w'), fall back to first non-loopback ethernet
+NET_IFACE=$(ip link show | awk -F': ' '/^[0-9]+: w/{print $2; exit}')
+if [ -z "$NET_IFACE" ]; then
+    NET_IFACE=$(ip link show | awk -F': ' '/^[0-9]+: /{iface=$2} /link\/ether/{print iface; exit}')
+fi
+[ -z "$NET_IFACE" ] && NET_IFACE="wlan0"   # last-resort fallback
+info "Detected network interface: $NET_IFACE"
+
 info "Copying dwm config.h and dwm.c..."
 cp "$REPO/dwm/config.h" "$DWM_DIR/config.h"
 cp "$REPO/dwm/dwm.c"    "$DWM_DIR/dwm.c"
+
+# patch HOME_PLACEHOLDER → actual home dir (screenshot paths + zed-launch path)
+sed -i "s|HOME_PLACEHOLDER|$HOME_DIR|g" "$DWM_DIR/config.h"
+ok "dwm config.h patched: HOME_PLACEHOLDER → $HOME_DIR"
 
 info "Compiling dwm..."
 cd "$DWM_DIR" && sudo make clean install
@@ -259,6 +272,10 @@ fi
 
 info "Copying slstatus config.h..."
 cp "$REPO/slstatus/config.h" "$SLSTATUS_DIR/config.h"
+
+# patch IFACE_PLACEHOLDER → real interface detected above
+sed -i "s|IFACE_PLACEHOLDER|$NET_IFACE|g" "$SLSTATUS_DIR/config.h"
+ok "slstatus config.h patched: IFACE_PLACEHOLDER → $NET_IFACE"
 
 info "Compiling slstatus..."
 cd "$SLSTATUS_DIR" && sudo make clean install
@@ -417,9 +434,9 @@ echo ""
 echo -e "${YELLOW}  ⚠  Adjust for your hardware:${NC}"
 echo ""
 echo "  ~/.xinitrc          → xrandr line (monitor output + resolution)"
-echo "  ~/slstatus/config.h → network interface (default: wlan0)"
-echo "                        check yours: ip link show | grep -E '^[0-9]'"
-echo "  ~/dwm/config.h      → /home/bobofthehawk/ in screenshot paths"
+echo "  ~/slstatus/config.h → network interface was auto-detected as: $NET_IFACE"
+echo "                        if wrong, edit and run: cd ~/slstatus && sudo make clean install"
+echo "  ~/dwm/config.h      → home paths were auto-patched to: $HOME_DIR"
 echo ""
 echo "  NVIDIA: after first boot run 'nvidia-smi' to confirm the"
 echo "  kernel module loaded. If it fails: journalctl -b | grep -i nvidia"
