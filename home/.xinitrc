@@ -13,5 +13,5 @@ picom --config ~/.config/picom/picom.conf &
 slstatus &
 lxpolkit &
 qutebrowser &
-setxkbmap -option caps:escape
+(sleep 1 && setxkbmap -option caps:escape) &
 exec dwm
