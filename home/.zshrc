@@ -1,7 +1,8 @@
-# ── Silence p10k console warning ──────────────────────────
-typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+# ── Pokemon + Fastfetch (must be before instant prompt) ───
+pokemon-colorscripts --no-title -s -r | fastfetch -c $HOME/.config/fastfetch/config-pokemon.jsonc --logo-type file-raw --logo-height 10 --logo-width 5 --logo -
+
+# ── Powerlevel10k instant prompt ──────────────────────────
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=off
-# Enable Powerlevel10k instant prompt
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
@@ -18,7 +19,6 @@ HISTSIZE=10000
 SAVEHIST=10000
 setopt SHARE_HISTORY
 setopt HIST_IGNORE_DUPS
-export CM_DIR="$HOME/.cache"
 
 # ── Options ────────────────────────────────────────────────
 setopt CORRECT
@@ -26,6 +26,13 @@ setopt CORRECT
 # ── Editor ─────────────────────────────────────────────────
 export VISUAL=nvim
 export EDITOR=nvim
+
+# ── PATH & ENV ─────────────────────────────────────────────
+export PATH="$HOME/.local/bin:$PATH"
+export MANROFFOPT="-c"
+export CM_DIR="$HOME/.cache"
+export YSU_MODE=ALL
+export ATUIN_KITTY_KEYBOARD_PROTOCOL=0
 
 # ── Prompt: Powerlevel10k ──────────────────────────────────
 zinit ice depth=1; zinit light romkatv/powerlevel10k
@@ -41,12 +48,7 @@ zinit light zsh-users/zsh-history-substring-search
 zinit light Aloxaf/fzf-tab
 zinit light MichaelAquilina/zsh-you-should-use
 zinit light hlissner/zsh-autopair
-
-# ── Syntax highlighting (must be last plugin) ──────────────
-zinit light zsh-users/zsh-syntax-highlighting
-
-# ── You Should Use ─────────────────────────────────────────
-export YSU_MODE=ALL
+zinit light zsh-users/zsh-syntax-highlighting  # must be last
 
 # ── Gruvbox syntax highlight colors ───────────────────────
 ZSH_HIGHLIGHT_STYLES[command]='fg=#b8bb26,bold'
@@ -62,26 +64,8 @@ ZSH_HIGHLIGHT_STYLES[comment]='fg=#665c54,italic'
 ZSH_HIGHLIGHT_STYLES[option]='fg=#fabd2f'
 ZSH_HIGHLIGHT_STYLES[globbing]='fg=#8ec07c'
 
-# ── Yazi ───────────────────────────────────────────────────
-function y() {
-    local tmp="$(mktemp -t "yazi-cwd.XXXXX")"
-    yazi "$@" --cwd-file="$tmp"
-    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-        cd -- "$cwd"
-    fi
-    rm -f -- "$tmp"
-}
-
-# ── Zoxide ─────────────────────────────────────────────────
-eval "$(zoxide init zsh)"
-alias zi='zoxide query -i'
-
-# ── fzf ────────────────────────────────────────────────────
-source <(fzf --zsh)
-
-# ── Atuin ──────────────────────────────────────────────────
-export ATUIN_KITTY_KEYBOARD_PROTOCOL=0
-eval "$(atuin init zsh)"
+# ── Autosuggest style ──────────────────────────────────────
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#a89984"
 
 # ── Vi mode ────────────────────────────────────────────────
 bindkey -v
@@ -115,10 +99,17 @@ bindkey -M vicmd '^[[A' _atuin_search_widget
 bindkey -M vicmd '^[[B' _atuin_search_widget
 bindkey -M viins '^F' autosuggest-accept
 
-# ── Autosuggest style ──────────────────────────────────────
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#a89984"
+# ── Tools ──────────────────────────────────────────────────
+eval "$(zoxide init zsh)"
+eval "$(atuin init zsh)"
+source <(fzf --zsh)
 
-# ── eza (better ls) ────────────────────────────────────────
+# ── fzf config ─────────────────────────────────────────────
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
+export FZF_DEFAULT_OPTS='--preview "bat --theme=gruvbox-dark --color=always {} 2>/dev/null || ls {}" --height 60% --reverse --border'
+
+# ── Aliases ────────────────────────────────────────────────
+# eza
 alias l='eza --icons --group-directories-first'
 alias ls='l'
 alias la='eza -la --icons --group-directories-first --git'
@@ -126,34 +117,34 @@ alias lt='eza --tree --icons --level=2 --git'
 alias lta='eza --tree --icons --level=2 -a --no-permissions --no-filesize --no-user --no-time --git --ignore-glob=".git"'
 alias ll='eza -l --icons --git'
 
-# ── bat (better cat + man pages) ──────────────────────────
+# bat
 alias cat='bat --theme=gruvbox-dark --style=numbers,changes,header'
+alias lsblk='lsblk | bat -l conf -p --theme=gruvbox-dark'
 export MANPAGER="sh -c 'col -bx | bat --theme=gruvbox-dark -l man -p'"
 
-# ── delta (better git diff) ────────────────────────────────
+# git
 export GIT_PAGER="delta"
 
-# ── fzf file finder ────────────────────────────────────────
-alias nf='vim $(fzf --preview "bat --theme=gruvbox-dark --color=always {}")'
-
-# ── Aliases ────────────────────────────────────────────────
+# general
+alias v='nvim'
+alias reload='source ~/.zshrc'
 alias myip='curl ifconfig.me'
 alias ping='ping -c 5'
 alias h='history'
-alias reload='source ~/.zshrc'
 alias f='fastfetch'
-alias v='vim'
-alias nv='nvim'
-alias lsblk='lsblk | bat -l conf -p --theme-dark=gruvbox-dark'
-
-# ── PATH & ENV ─────────────────────────────────────────────
-export PATH="$HOME/.local/bin:$PATH"
-export MANROFFOPT="-c"
-
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
-export FZF_DEFAULT_OPTS='--preview "bat --theme=gruvbox-dark --color=always {} 2>/dev/null || ls {}" --height 60% --reverse --border'
+alias zi='zoxide query -i'
+alias xcp='xclip -selection clipboard'
+alias nf='nvim $(fzf --preview "bat --theme=gruvbox-dark --color=always {}")'
 
 # ── Functions ──────────────────────────────────────────────
+function y() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXX")"
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
+}
 
 fcd() {
   local dir=$(fd --type d --hidden --exclude .git | fzf --preview 'tree -C {} 2>/dev/null || ls -F {} | head -20')
@@ -204,10 +195,3 @@ fcopy() {
   [[ -n $file ]] && cat "$file" | xclip -selection clipboard
 }
 
-# Put this BEFORE the instant prompt lines
-pokemon-colorscripts --no-title -s -r | fastfetch -c $HOME/.config/fastfetch/config-pokemon.jsonc --logo-type file-raw --logo-height 10 --logo-width 5 --logo -
-
-# Enable Powerlevel10k instant prompt (this must come after)
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
