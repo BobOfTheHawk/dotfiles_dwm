@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bob's nvim reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Fira+Code:wght@300;400;500&display=swap');
+
+:root {
+  --bg0-h: #1d2021;
+  --bg0: #282828;
+  --bg1: #3c3836;
+  --bg2: #504945;
+  --bg3: #665c54;
+  --bg4: #7c6f64;
+  --fg0: #fbf1c7;
+  --fg1: #ebdbb2;
+  --fg2: #d5c4a1;
+  --fg3: #bdae93;
+  --fg4: #a89984;
+  --red: #cc241d;
+  --red-bright: #fb4934;
+  --green: #98971a;
+  --green-bright: #b8bb26;
+  --yellow: #d79921;
+  --yellow-bright: #fabd2f;
+  --blue: #458588;
+  --blue-bright: #83a598;
+  --purple: #b16286;
+  --purple-bright: #d3869b;
+  --aqua: #689d6a;
+  --aqua-bright: #8ec07c;
+  --orange: #d65d0e;
+  --orange-bright: #fe8019;
+  --gray: #928374;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg0-h);
+  color: var(--fg1);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  background: var(--bg0);
+  border-bottom: 1px solid var(--bg2);
+  padding: 20px 24px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-top {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--yellow-bright);
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--fg4);
+}
+
+.search {
+  width: 100%;
+  background: var(--bg1);
+  border: 1px solid var(--bg3);
+  border-radius: 4px;
+  padding: 7px 12px;
+  color: var(--fg1);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 12px;
+}
+
+.search:focus { border-color: var(--yellow); }
+.search::placeholder { color: var(--bg4); }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 4px 11px;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid var(--bg3);
+  color: var(--fg4);
+  background: transparent;
+  font-family: inherit;
+  transition: all 0.12s;
+  letter-spacing: 0.02em;
+}
+.tab:hover { border-color: var(--fg4); color: var(--fg2); }
+.tab.active { background: var(--yellow); border-color: var(--yellow); color: var(--bg0-h); font-weight: 600; }
+.tab.cat-file.active { background: var(--aqua-bright); border-color: var(--aqua-bright); }
+.tab.cat-edit.active { background: var(--green-bright); border-color: var(--green-bright); }
+.tab.cat-lsp.active { background: var(--purple-bright); border-color: var(--purple-bright); }
+.tab.cat-git.active { background: var(--orange-bright); border-color: var(--orange-bright); }
+.tab.cat-ui.active { background: var(--blue-bright); border-color: var(--blue-bright); }
+.tab.cat-nav.active { background: var(--yellow-bright); border-color: var(--yellow-bright); }
+.tab.cat-win.active { background: var(--red-bright); border-color: var(--red-bright); }
+
+/* MAIN */
+.main { padding: 16px 24px 40px; max-width: 900px; margin: 0 auto; }
+
+/* SECTION */
+.section { margin-bottom: 8px; border: 1px solid var(--bg2); border-radius: 5px; overflow: hidden; }
+
+.section-header {
+  padding: 10px 14px;
+  background: var(--bg0);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+  transition: background 0.1s;
+}
+.section-header:hover { background: var(--bg1); }
+
+.section-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+.section-name { font-size: 13px; font-weight: 600; color: var(--fg0); flex: 1; }
+.section-tagline { font-size: 11px; color: var(--fg4); }
+.section-badge {
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-weight: 600;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
+.badge-file { background: var(--aqua); color: var(--bg0-h); }
+.badge-edit { background: var(--green); color: var(--bg0-h); }
+.badge-lsp { background: var(--purple); color: var(--fg0); }
+.badge-git { background: var(--orange); color: var(--bg0-h); }
+.badge-ui { background: var(--blue); color: var(--fg0); }
+.badge-nav { background: var(--yellow); color: var(--bg0-h); }
+.badge-win { background: var(--red); color: var(--fg0); }
+
+.chevron { color: var(--bg4); font-size: 10px; transition: transform 0.15s; flex-shrink: 0; }
+.chevron.open { transform: rotate(90deg); color: var(--fg4); }
+
+.section-body { display: none; padding: 14px; background: var(--bg0-h); border-top: 1px solid var(--bg2); }
+.section-body.open { display: block; }
+
+/* BLOCKS */
+.block { margin-bottom: 14px; }
+.block:last-child { margin-bottom: 0; }
+
+.block-label {
+  font-size: 10px;
+  color: var(--yellow);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+/* KEYBINDS */
+.kb { display: flex; align-items: baseline; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--bg1); }
+.kb:last-child { border-bottom: none; }
+
+kbd {
+  font-family: inherit;
+  font-size: 11px;
+  background: var(--bg2);
+  border: 1px solid var(--bg3);
+  border-bottom: 2px solid var(--bg4);
+  border-radius: 3px;
+  padding: 1px 7px;
+  color: var(--yellow-bright);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.kb-desc { font-size: 12px; color: var(--fg3); }
+.kb-mode { font-size: 10px; color: var(--bg4); margin-left: auto; flex-shrink: 0; }
+
+/* TIP */
+.tip {
+  background: var(--bg1);
+  border-left: 3px solid var(--aqua);
+  border-radius: 0 3px 3px 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--fg3);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.tip.tip-warn { border-left-color: var(--yellow); }
+.tip.tip-green { border-left-color: var(--green-bright); }
+
+/* GRID */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 600px) { .grid2 { grid-template-columns: 1fr; } }
+
+/* WORKFLOW */
+.workflow { display: flex; flex-direction: column; gap: 4px; }
+.workflow-step { display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; }
+.step-num { background: var(--yellow); color: var(--bg0-h); font-size: 10px; font-weight: 700; border-radius: 99px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.step-text { font-size: 12px; color: var(--fg3); line-height: 1.5; }
+.step-text kbd { font-size: 10px; }
+
+/* NO RESULTS */
+.no-results { text-align: center; padding: 3rem; color: var(--bg4); }
+.no-results span { font-size: 14px; display: block; margin-top: 8px; }
+
+/* MODE INDICATOR colors */
+.mode-n { color: var(--blue-bright); }
+.mode-i { color: var(--green-bright); }
+.mode-v { color: var(--purple-bright); }
+.mode-c { color: var(--yellow-bright); }
+
+/* divider */
+.divider { height: 1px; background: var(--bg2); margin: 10px 0; }
+
+.inline-code { background: var(--bg2); padding: 1px 5px; border-radius: 3px; color: var(--aqua-bright); font-family: inherit; font-size: 11px; }
+
+.count { color: var(--bg4); font-size: 11px; margin-left: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="title">bob's nvim</div>
+    <div class="subtitle">complete plugin & keybind reference</div>
+  </div>
+  <input class="search" id="search" placeholder="/ search keybind, plugin, action..." />
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-cat="all">all</button>
+    <button class="tab cat-nav" data-cat="nav">navigation</button>
+    <button class="tab cat-file" data-cat="file">files</button>
+    <button class="tab cat-edit" data-cat="edit">editing</button>
+    <button class="tab cat-lsp" data-cat="lsp">lsp</button>
+    <button class="tab cat-git" data-cat="git">git</button>
+    <button class="tab cat-ui" data-cat="ui">ui</button>
+    <button class="tab cat-win" data-cat="win">windows</button>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+
+<script>
+const data = [
+  {
+    name: "core keymaps",
+    icon: "⌨",
+    cat: "nav",
+    tag: "nav",
+    tagline: "global keybinds — always available",
+    sections: [
+      {
+        label: "leader key",
+        tip: "Your leader key is SPACE. Every <leader> keymap starts with Space.\nAll keybinds below use Space as the first key."
+      },
+      {
+        label: "essential",
+        keys: [
+          ["<leader><leader>", "source/reload current lua file", "n"],
+          ["<C-c>", "exit insert mode (same as Esc)", "i"],
+          ["<C-c>", "clear search highlights", "n"],
+          ["Q", "disabled (would open ex mode)", "n"],
+        ]
+      },
+      {
+        label: "movement",
+        keys: [
+          ["<C-d>", "scroll half page down — cursor stays centered", "n"],
+          ["<C-u>", "scroll half page up — cursor stays centered", "n"],
+          ["n", "next search result — cursor centered", "n"],
+          ["N", "previous search result — cursor centered", "n"],
+          ["J", "move selected lines down", "v"],
+          ["K", "move selected lines up", "v"],
+        ]
+      },
+      {
+        label: "indenting",
+        keys: [
+          [">", "indent selection — stays selected after", "v"],
+          ["<", "unindent selection — stays selected after", "v"],
+        ]
+      },
+      {
+        label: "yank / paste / delete",
+        keys: [
+          ["<leader>Y", "yank to system clipboard explicitly", "n"],
+          ["<leader>p", "paste without overwriting clipboard", "x"],
+          ["p", "paste over selection without losing clipboard", "v"],
+          ["<leader>d", "delete to black hole (clipboard untouched)", "n/v"],
+          ["x", "delete char to black hole (clipboard untouched)", "n"],
+        ]
+      },
+      {
+        label: "misc",
+        keys: [
+          ["<leader>s", "rename word under cursor across whole file", "n"],
+          ["<leader>f", "format with LSP", "n"],
+          ["<leader>X", "chmod +x on current file", "n"],
+          ["<leader>fp", "copy file path to clipboard", "n"],
+          ["<leader>re", "restart neovim", "n"],
+          ["<C-f>", "open tmux-sessionizer in new window", "n"],
+        ]
+      },
+    ]
+  },
+
+  {
+    name: "window splits",
+    icon: "▪",
+    cat: "win",
+    tag: "win",
+    tagline: "split, resize, navigate panes",
+    sections: [
+      {
+        label: "create splits",
+        keys: [
+          ["<leader>sv", "split vertical (side by side)", "n"],
+          ["<leader>sh", "split horizontal (top/bottom)", "n"],
+          ["<leader>se", "equalize all split sizes", "n"],
+          ["<leader>sx", "close current split", "n"],
+        ]
+      },
+      {
+        label: "navigate splits",
+        keys: [
+          ["<C-w>h", "move to left split", "n"],
+          ["<C-w>j", "move to split below", "n"],
+          ["<C-w>k", "move to split above", "n"],
+          ["<C-w>l", "move to right split", "n"],
+          ["<C-w><C-w>", "cycle through splits", "n"],
+        ]
+      },
+      {
+        label: "maximize",
+        keys: [
+          ["<leader>sm", "maximize current split / restore to normal", "n"],
+        ]
+      },
+      {
+        label: "tabs",
+        keys: [
+          ["<leader>to", "open new tab", "n"],
+          ["<leader>tx", "close current tab", "n"],
+          ["<leader>tn", "next tab", "n"],
+          ["<leader>tp", "previous tab", "n"],
+          ["<leader>tf", "open current file in new tab", "n"],
+        ]
+      },
+    ]
+  },
+
+  {
+    name: "oil.nvim",
+    icon: "◈",
+    cat: "file",
+    tag: "file",
+    tagline: "file explorer as editable buffer — rename by typing",
+    sections: [
+      {
+        label: "open",
+        keys: [
+          ["-", "open parent directory in current window", "n"],
+          ["<leader>-", "open parent directory in float", "n"],
+        ]
+      },
+      {
+        label: "inside oil buffer",
+        keys: [
+          ["Enter", "open file / enter directory", "n"],
+          ["<BS> or -", "go up to parent", "n"],
+          ["q", "close oil", "n"],
+          ["<C-r>", "refresh directory listing", "n"],
+          ["<M-h>", "open file in horizontal split", "n"],
+          ["<M-v>", "open file in vertical split", "n"],
+          ["gs", "change sort method", "n"],
+          ["gx", "open with external app", "n"],
+          ["g.", "toggle hidden files", "n"],
+        ]
+      },
+      {
+        label: "how to rename, delete, move files",
+        tip: "Oil shows the directory as a normal text buffer.\n\nRENAME: edit the filename text, then :w to save\nDELETE: delete the line (dd), then :w to save\nCREATE: add a new line with the filename, then :w\nMOVE: cut the line, paste in another directory buffer\n\nDeletions go to trash by default — not permanently deleted.\nHidden files are shown (dotfiles visible)."
+      },
+    ]
+  },
+
+  {
+    name: "harpoon2",
+    icon: "⚓",
+    cat: "file",
+    tag: "nav",
+    tagline: "bookmark files for instant jumping",
+    sections: [
+      {
+        label: "mark files",
+        keys: [
+          ["<leader>a", "add current file to harpoon list", "n"],
+          ["<C-e>", "open harpoon menu (shows your list)", "n"],
+        ]
+      },
+      {
+        label: "jump to marks",
+        keys: [
+          ["<C-y>", "jump to mark #1", "n"],
+          ["<C-i>", "jump to mark #2", "n"],
+          ["<C-n>", "jump to mark #3", "n"],
+          ["<C-s>", "jump to mark #4", "n"],
+          ["<C-S-P>", "previous mark", "n"],
+          ["<C-S-N>", "next mark", "n"],
+        ]
+      },
+      {
+        label: "workflow",
+        workflow: [
+          "Open files you use constantly in a project",
+          "Press <kbd><leader>a</kbd> to mark each one",
+          "Press <kbd><C-e></kbd> to see the numbered list",
+          "Use <kbd><C-y/i/n/s></kbd> to jump instantly",
+          "Edit the menu buffer to reorder marks",
+        ]
+      },
+      {
+        label: "tip",
+        tip: "Marks are saved per git repository automatically.\nDifferent project = different marks.\nOpen the menu with <C-e> whenever you forget the order — the list shows numbers."
+      },
+    ]
+  },
+
+  {
+    name: "fff.nvim",
+    icon: "⌕",
+    cat: "file",
+    tag: "nav",
+    tagline: "fast fuzzy finder with frecency",
+    sections: [
+      {
+        label: "find files",
+        keys: [
+          ["<leader>pf", "find files in project", "n"],
+          ["<leader>ps", "live grep — search text in all files", "n"],
+          ["<leader>pgf", "find files from git root", "n"],
+          ["<leader>pcf", "find files in nvim config directory", "n"],
+        ]
+      },
+      {
+        label: "tip",
+        tip: "fff uses frecency — combines frequency and recency.\nFiles you open often AND recently rank higher.\nGets smarter the more you use it.\n\nFor live grep (<leader>ps): type your search, results update as you type."
+      },
+    ]
+  },
+
+  {
+    name: "telescope.nvim",
+    icon: "◎",
+    cat: "file",
+    tag: "nav",
+    tagline: "fuzzy finder — LSP backend + file history",
+    sections: [
+      {
+        label: "find",
+        keys: [
+          ["<leader>pr", "recent files you opened", "n"],
+          ["<leader>pWs", "grep WORD under cursor across project", "n"],
+          ["<leader>pk", "search keymaps", "n"],
+          ["<leader>vh", "search vim help pages", "n"],
+          ["<leader>th", "colorscheme switcher with live preview", "n"],
+          ["<leader>gbr", "switch git branch", "n"],
+        ]
+      },
+      {
+        label: "inside telescope picker",
+        keys: [
+          ["<C-j> / j", "move selection down", "n"],
+          ["<C-k> / k", "move selection up", "n"],
+          ["Enter", "open selected item", "n"],
+          ["<C-v>", "open in vertical split", "n"],
+          ["<C-x>", "open in horizontal split", "n"],
+          ["<C-t>", "open in new tab", "n"],
+          ["<C-u>", "scroll preview up", "n"],
+          ["<C-d>", "scroll preview down", "n"],
+          ["<Esc>", "close telescope", "n"],
+        ]
+      },
+      {
+        label: "tip",
+        tip: "Telescope is also used as the display for LSP actions.\ngd, gR, gi, gt, <leader>D all open inside Telescope."
+      },
+    ]
+  },
+
+  {
+    name: "mini.files",
+    icon: "▤",
+    cat: "file",
+    tag: "file",
+    tagline: "miller-column file explorer",
+    sections: [
+      {
+        label: "open",
+        keys: [
+          ["<leader>ee", "open mini.files at current working directory", "n"],
+          ["<leader>ef", "open mini.files revealing current file", "n"],
+        ]
+      },
+      {
+        label: "navigate",
+        keys: [
+          ["Enter / L", "enter directory / open file", "n"],
+          ["- / H", "go to parent directory", "n"],
+          ["q", "close", "n"],
+        ]
+      },
+    ]
+  },
+
+  {
+    name: "Comment.nvim",
+    icon: "#",
+    cat: "edit",
+    tag: "edit",
+    tagline: "toggle comments — auto-detects syntax per language",
+    sections: [
+      {
+        label: "line comments",
+        keys: [
+          ["gcc", "toggle comment on current line", "n"],
+          ["gc + motion", "comment with motion (gc3j = 3 lines down)", "n"],
+          ["gc", "toggle comment on selection", "v"],
+        ]
+      },
+      {
+        label: "block comments",
+        keys: [
+          ["gbc", "toggle block comment on current line", "n"],
+          ["gb", "toggle block comment on selection", "v"],
+        ]
+      },
+      {
+        label: "language syntax",
+        tip: "Auto-detects the right syntax per language:\n\nGo / JS / TS / C  →  // comment\nPython / Shell    →  # comment\nLua               →  -- comment\nHTML              →  <!-- comment -->\nJSX / TSX         →  {/* comment */}\nCSS               →  /* comment */\n\nIn mixed files (JSX with CSS-in-JS), it uses Treesitter\nto detect what syntax the cursor is actually in."
+      },
+    ]
+  },
+
+  {
+    name: "mini.surround",
+    icon: "( )",
+    cat: "edit",
+    tag: "edit",
+    tagline: "add, delete, change surrounding characters",
+    sections: [
+      {
+        label: "operations",
+        keys: [
+          ["sa + motion + char", "add surrounding", "n"],
+          ["sd + char", "delete surrounding", "n"],
+          ["sc + old + new", "change surrounding", "n"],
+          ["sf + char", "find next surrounding", "n"],
+          ["sF + char", "find previous surrounding", "n"],
+        ]
+      },
+      {
+        label: "examples",
+        tip: 'ADD:    cursor on  hello    →  saiw"   →  "hello"\n        cursor on  hello    →  saiw(   →  (hello)\n        cursor on  hello    →  saiw{   →  {hello}\n\nDELETE: cursor inside "hello"   →  sd"   →  hello\n        cursor inside (hello)   →  sd)   →  hello\n\nCHANGE: cursor inside "hello"   →  sc"\'  →  \'hello\'\n        cursor inside (hello)   →  sc)[  →  [hello]\n\nMotion iw = inner word (whole word)\nMotion i" = inner quotes (text inside)\nMotion a" = around quotes (includes the quotes)'
+      },
+    ]
+  },
+
+  {
+    name: "nvim-autopairs",
+    icon: "[]",
+    cat: "edit",
+    tag: "edit",
+    tagline: "auto-close brackets, quotes, parens",
+    sections: [
+      {
+        label: "automatic pairs",
+        keys: [
+          ["(", "inserts (  )  — cursor inside", "i"],
+          ["{", "inserts {  }  — cursor inside", "i"],
+          ["[", "inserts [  ]  — cursor inside", "i"],
+          ["\"", "inserts \"  \"  — cursor inside", "i"],
+          ["'", "inserts '  '  — cursor inside", "i"],
+          ["`", "inserts `  `  — cursor inside", "i"],
+        ]
+      },
+      {
+        label: "tip",
+        tip: "Treesitter-aware — won't auto-pair inside Lua strings or comments.\nIntegrated with nvim-cmp so it doesn't conflict with autocomplete.\nJust type naturally — it gets out of the way when you don't need it."
+      },
+    ]
+  },
+
+  {
+    name: "nvim-cmp + LuaSnip",
+    icon: "◉",
+    cat: "lsp",
+    tag: "lsp",
+    tagline: "autocompletion engine — triggers automatically as you type",
+    sections: [
+      {
+        label: "navigate completion menu",
+        keys: [
+          ["<C-j> / <C-n>", "next completion item", "i"],
+          ["<C-k> / <C-p>", "previous completion item", "i"],
+          ["<C-y>", "confirm / accept selected item", "i"],
+          ["<Tab>", "confirm if 1 item, otherwise next", "i"],
+          ["<C-e>", "close menu without confirming", "i"],
+        ]
+      },
+      {
+        label: "docs popup",
+        keys: [
+          ["<C-f>", "scroll docs down", "i"],
+          ["<C-b>", "scroll docs up", "i"],
+        ]
+      },
+      {
+        label: "snippets (LuaSnip)",
+        keys: [
+          ["<Tab>", "jump to next snippet placeholder", "i/s"],
+          ["<S-Tab>", "jump to previous placeholder", "i/s"],
+        ]
+      },
+      {
+        label: "completion sources (shown in menu)",
+        tip: "[LSP]     — suggestions from language server (functions, types)\n[LuaSnip] — code snippet templates\n[Buffer]  — words already in your current file\n[Path]    — file system paths\n[Spell]   — spell suggestions (markdown files only)\n\nAll sources are merged and ranked automatically.\nLanguage-specific snippets come from friendly-snippets\n(includes Go, Python, JS, TS, HTML, CSS, Lua and more)."
+      },
+      {
+        label: "tip",
+        tip: "Completion triggers automatically as you type.\nNo need to manually invoke it.\nFor Go/Python/etc: completions only work well when the LSP\nfor that language is running and has a proper root directory (go.mod).",
+        tipClass: "tip-warn"
+      },
+    ]
+  },
+
+  {
+    name: "lspconfig (gopls, ts_ls, lua_ls...)",
+    icon: "⚡",
+    cat: "lsp",
+    tag: "lsp",
+    tagline: "language server — active when an LSP attaches to the buffer",
+    sections: [
+      {
+        label: "navigation",
+        keys: [
+          ["gd", "go to definition — where this is defined", "n"],
+          ["gD", "go to declaration (different from definition in C/Go)", "n"],
+          ["gR", "show all references — everywhere this is used (telescope)", "n"],
+          ["gi", "show all implementations of an interface", "n"],
+          ["gt", "show type definition", "n"],
+        ]
+      },
+      {
+        label: "information",
+        keys: [
+          ["K", "hover docs — what is this thing?", "n"],
+          ["<C-h>", "signature help — show function parameters", "i"],
+          ["<leader>d", "show line diagnostics in float popup", "n"],
+          ["<leader>D", "show all file diagnostics in telescope", "n"],
+          ["<leader>lx", "toggle virtual text (inline error text) on/off", "n"],
+        ]
+      },
+      {
+        label: "actions",
+        keys: [
+          ["<leader>rn", "smart rename — renames everywhere in project", "n"],
+          ["<leader>vca", "code actions — quick fixes, auto-imports, refactors", "n"],
+          ["<leader>f", "format file with LSP", "n"],
+          ["<leader>rs", "restart LSP server if it crashes", "n"],
+        ]
+      },
+      {
+        label: "diagnostics explained",
+        tip: "Diagnostics are real-time errors/warnings from the language server.\n\nGutter icons on the left:\n  ✘ = error\n  ▲ = warning\n  ○ = hint\n  ℹ = info\n\nVirtual text = the message shown inline at end of the line.\nToggle it with <leader>lx if it's too noisy.\n\n<leader>d = shows the full error message in a popup\n<leader>D = shows all errors in the file in telescope"
+      },
+      {
+        label: "installed servers",
+        tip: "lua_ls      → Lua (your neovim config)\nts_ls       → TypeScript / JavaScript\ngopls       → Go  ← needs go.mod in project root\ncssls       → CSS / SCSS / Less\ntailwindcss → Tailwind classes\nastro        → Astro\nmarksman    → Markdown (links, references)\nemmet       → HTML abbreviations\n\nAll auto-install via Mason on first startup."
+      },
+    ]
+  },
+
+  {
+    name: "mason.nvim",
+    icon: "⊞",
+    cat: "lsp",
+    tag: "lsp",
+    tagline: "install and manage LSP servers, formatters, linters",
+    sections: [
+      {
+        label: "commands",
+        keys: [
+          [":Mason", "open Mason UI — browse and manage all tools", "c"],
+          [":MasonInstall <name>", "install a specific server", "c"],
+          [":MasonUninstall <name>", "remove a server", "c"],
+          [":MasonUpdate", "update all installed servers", "c"],
+        ]
+      },
+      {
+        label: "add a new language server",
+        workflow: [
+          "Add server name to <kbd>ensure_installed</kbd> in mason.lua",
+          "Add <kbd>vim.lsp.enable('servername')</kbd> in lspconfig.lua",
+          "Restart Neovim — it auto-installs",
+          "Open a file of that type and check <kbd>:checkhealth lsp</kbd>",
+        ]
+      },
+      {
+        label: "tip",
+        tip: "You rarely need to open Mason manually.\nYour config auto-installs everything on startup.\nInstalled: lua_ls, ts_ls, gopls, cssls, tailwindcss,\nastro, emmet_ls, emmet_language_server, marksman,\nbiome, prettier, stylua, pylint, clangd."
+      },
+    ]
+  },
+
+  {
+    name: "conform.nvim",
+    icon: "≡",
+    cat: "edit",
+    tag: "edit",
+    tagline: "code formatter — manual trigger",
+    sections: [
+      {
+        label: "format",
+        keys: [
+          ["<leader>mp", "format current file", "n"],
+          ["<leader>mp", "format selected range only", "v"],
+        ]
+      },
+      {
+        label: "formatters by language",
+        tip: "JavaScript / TypeScript / JSX / TSX  →  biome-check\nJSON / CSS                            →  biome-check\nHTML / Svelte / YAML / GraphQL        →  prettier\nLua                                   →  stylua\nMarkdown                              →  mdformat + markdown-toc\n\nFormat on save is OFF — trigger manually with <leader>mp."
+      },
+    ]
+  },
+
+  {
+    name: "nvim-lint",
+    icon: "⚠",
+    cat: "edit",
+    tag: "edit",
+    tagline: "linter — runs automatically",
+    sections: [
+      {
+        label: "trigger",
+        keys: [
+          ["<leader>l", "run linter manually on current file", "n"],
+        ]
+      },
+      {
+        label: "automatic triggers",
+        tip: "Linting runs automatically on:\n  - BufEnter (when you open a file)\n  - BufWritePost (when you save)\n  - InsertLeave (when you exit insert mode)\n\nLinters:\n  JS / TS / Svelte  →  biomejs\n  Python            →  pylint\n\nErrors appear as diagnostics (gutter icons + virtual text)."
+      },
+    ]
+  },
+
+  {
+    name: "nvim-ufo",
+    icon: "⌄",
+    cat: "edit",
+    tag: "edit",
+    tagline: "better code folding with treesitter",
+    sections: [
+      {
+        label: "fold all",
+        keys: [
+          ["zR", "open ALL folds in file", "n"],
+          ["zM", "close ALL folds in file", "n"],
+        ]
+      },
+      {
+        label: "per fold",
+        keys: [
+          ["za", "toggle fold under cursor", "n"],
+          ["zo", "open fold under cursor", "n"],
+          ["zc", "close fold under cursor", "n"],
+          ["zO", "open fold and all nested folds", "n"],
+        ]
+      },
+      {
+        label: "tip",
+        tip: "Uses Treesitter to detect fold ranges — understands\nfunction boundaries, classes, and blocks properly.\nFalls back to indent-based folding when no parser exists.\n\nFold level starts at 99 (all open) — use zM to close all."
+      },
+    ]
+  },
+
+  {
+    name: "mini.surround (extras)",
+    icon: "▸",
+    cat: "edit",
+    tag: "edit",
+    tagline: "mini.trailspace + mini.splitjoin",
+    sections: [
+      {
+        label: "trailspace",
+        keys: [
+          ["<leader>cw", "trim all trailing whitespace in file", "n"],
+        ]
+      },
+      {
+        label: "splitjoin",
+        keys: [
+          ["sj", "join arguments onto one line", "n"],
+          ["sk", "split arguments across multiple lines", "n"],
+        ]
+      },
+      {
+        label: "example",
+        tip: 'splitjoin example:\n\nsk splits:  fn(a, b, c)  →  fn(\n                              a,\n                              b,\n                              c,\n                            )\n\nsj joins:   fn(\n              a,\n              b,\n            )  →  fn(a, b)'
+      },
+    ]
+  },
+
+  {
+    name: "undotree",
+    icon: "⎌",
+    cat: "edit",
+    tag: "edit",
+    tagline: "visual undo history — never lose work",
+    sections: [
+      {
+        label: "open / close",
+        keys: [
+          ["<leader>u", "toggle undotree panel", "n"],
+        ]
+      },
+      {
+        label: "inside undotree",
+        keys: [
+          ["j / k", "navigate history nodes", "n"],
+          ["Enter", "jump to that point in time", "n"],
+          ["u", "undo one step", "n"],
+          ["<C-r>", "redo one step", "n"],
+          ["q", "close undotree", "n"],
+        ]
+      },
+      {
+        label: "why it's powerful",
+        tip: "Regular undo (u) is linear — if you undo and make new changes,\nthe old changes are gone forever.\n\nUndotree is a TREE — every state is preserved.\nYou can always go back to any point even after branching.\n\nWorks across sessions because undofile=true saves history to disk.\nEven after closing Neovim and reopening, history is intact."
+      },
+    ]
+  },
+
+  {
+    name: "gitsigns.nvim",
+    icon: "±",
+    cat: "git",
+    tag: "git",
+    tagline: "inline git diff in gutter — hunk operations",
+    sections: [
+      {
+        label: "navigate hunks",
+        keys: [
+          ["]h", "next changed hunk", "n"],
+          ["[h", "previous changed hunk", "n"],
+        ]
+      },
+      {
+        label: "stage / reset",
+        keys: [
+          ["<leader>gs", "stage hunk under cursor", "n"],
+          ["<leader>gr", "reset hunk under cursor (discard changes)", "n"],
+          ["<leader>gs", "stage selected lines", "v"],
+          ["<leader>gr", "reset selected lines", "v"],
+        ]
+      },
+      {
+        label: "blame",
+        keys: [
+          ["<leader>gbl", "blame current line — who wrote this and when", "n"],
+          ["<leader>gB", "toggle inline blame on all lines", "n"],
+        ]
+      },
+      {
+        label: "diff",
+        keys: [
+          ["<leader>gd", "diff current file vs HEAD", "n"],
+        ]
+      },
+      {
+        label: "gutter symbols",
+        tip: "│  (green bar)  = added lines\n~  (orange bar) = changed lines\n_  (red bar)    = deleted lines below\n‾  (red bar)    = deleted lines above\n\nA hunk is a contiguous block of changes.\nYou can stage individual hunks without staging the whole file."
+      },
+    ]
+  },
+
+  {
+    name: "vim-fugitive",
+    icon: "⑂",
+    cat: "git",
+    tag: "git",
+    tagline: "full git integration inside neovim",
+    sections: [
+      {
+        label: "open",
+        keys: [
+          ["<leader>gg", "open Git status in fullscreen tab", "n"],
+        ]
+      },
+      {
+        label: "inside fugitive status",
+        keys: [
+          ["s", "stage file / hunk", "n"],
+          ["u", "unstage file / hunk", "n"],
+          ["=", "toggle inline diff for file", "n"],
+          ["cc", "create commit", "n"],
+          ["dv", "diff view — see changes side by side", "n"],
+          ["<leader>P", "git push", "n"],
+          ["<leader>p", "git pull --rebase", "n"],
+          ["<leader>t", "set upstream tracking branch", "n"],
+          ["q", "close fugitive", "n"],
+        ]
+      },
+      {
+        label: "tip",
+        tip: "In the status buffer, files under 'Unstaged' are changed but not staged.\nFiles under 'Staged' are ready to commit.\nPress s to move from unstaged → staged, u to move back."
+      },
+    ]
+  },
+
+  {
+    name: "snacks.nvim (lazygit + tools)",
+    icon: "◆",
+    cat: "git",
+    tag: "git",
+    tagline: "lazygit, file rename, buffer delete",
+    sections: [
+      {
+        label: "lazygit",
+        keys: [
+          ["<leader>lg", "open lazygit full TUI", "n"],
+          ["<leader>gl", "git log view", "n"],
+        ]
+      },
+      {
+        label: "file tools",
+        keys: [
+          ["<leader>rN", "rename current file", "n"],
+          ["<leader>dB", "safely delete current buffer", "n"],
+        ]
+      },
+      {
+        label: "lazygit controls",
+        tip: "Inside lazygit:\n  j/k or arrows  →  navigate\n  Space          →  stage/unstage file\n  c              →  commit\n  P              →  push\n  p              →  pull\n  b              →  branch menu\n  ?              →  show all keybinds\n  q              →  quit lazygit"
+      },
+    ]
+  },
+
+  {
+    name: "git-worktree.nvim",
+    icon: "⑃",
+    cat: "git",
+    tag: "git",
+    tagline: "git worktree management",
+    sections: [
+      {
+        label: "worktrees",
+        keys: [
+          ["<leader>wl", "list all worktrees (telescope)", "n"],
+          ["<leader>wc", "create new worktree", "n"],
+        ]
+      },
+      {
+        label: "tip",
+        tip: "Worktrees let you have multiple branches checked out simultaneously\nin different directories — useful for working on two features at once\nwithout stashing."
+      },
+    ]
+  },
+
+  {
+    name: "trouble.nvim",
+    icon: "⊗",
+    cat: "lsp",
+    tag: "lsp",
+    tagline: "pretty diagnostics panel",
+    sections: [
+      {
+        label: "open panels",
+        keys: [
+          ["<leader>xw", "workspace diagnostics — all errors in project", "n"],
+          ["<leader>xd", "buffer diagnostics — errors in current file", "n"],
+          ["<leader>xq", "quickfix list", "n"],
+          ["<leader>xl", "location list", "n"],
+          ["<leader>xt", "TODOs list", "n"],
+        ]
+      },
+      {
+        label: "inside trouble",
+        keys: [
+          ["j / k", "navigate items", "n"],
+          ["Enter", "jump to that error/location", "n"],
+          ["q", "close trouble panel", "n"],
+        ]
+      },
+    ]
+  },
+
+  {
+    name: "todo-comments.nvim",
+    icon: "✦",
+    cat: "ui",
+    tag: "ui",
+    tagline: "highlight and navigate TODO/FIXME/NOTE tags",
+    sections: [
+      {
+        label: "navigate",
+        keys: [
+          ["]t", "jump to next TODO comment", "n"],
+          ["[t", "jump to previous TODO comment", "n"],
+          ["<leader>pt", "search all TODOs in picker", "n"],
+          ["<leader>pT", "search TODOs in telescope", "n"],
+        ]
+      },
+      {
+        label: "tags you can use",
+        tip: "Write these in comments and they get highlighted:\n\n  TODO:     → blue    — thing to do\n  FIXME:    → red     — broken thing\n  HACK:     → orange  — workaround\n  NOTE:     → green   — important context\n  WARN:     → yellow  — be careful\n  PERF:     → purple  — performance issue\n  TEST:     → cyan    — test related\n  FORGETNOT:→ custom  — your personal tag\n\nExample:\n  -- TODO: add error handling here\n  // FIXME: this crashes on empty input\n  # NOTE: this runs in O(n²) — optimize later"
+      },
+    ]
+  },
+
+  {
+    name: "render-markdown.nvim",
+    icon: "◌",
+    cat: "ui",
+    tag: "ui",
+    tagline: "visual markdown rendering in buffer",
+    sections: [
+      {
+        label: "automatic",
+        tip: "Active automatically in .md files. No keybinds needed.\n\nRenders:\n  # Headings    →  icons (󰎤 󰎧 󰎪 ...) with colored background\n  ```code```    →  styled code blocks\n  - [ ]         →  checkbox icon 󰄱\n  - [x]         →  checked icon 󰱒\n  - bullets      →  styled bullet glyphs\n\nAlso active in: .rmd, .org, .norg files."
+      },
+    ]
+  },
+
+  {
+    name: "markdown-preview.nvim",
+    icon: "⬡",
+    cat: "ui",
+    tag: "ui",
+    tagline: "live browser preview for markdown",
+    sections: [
+      {
+        label: "toggle",
+        keys: [
+          ["<leader>md", "open/close markdown preview in browser", "n"],
+        ]
+      },
+      {
+        label: "tip",
+        tip: "Opens a browser tab with full GitHub-style rendering.\nUpdates live as you type — no need to save.\nSupports: tables, images, code blocks with syntax highlight,\ncheckboxes, footnotes, math, and more.\n\nOnly works in .md files."
+      },
+    ]
+  },
+
+  {
+    name: "auto-session",
+    icon: "⊙",
+    cat: "ui",
+    tag: "ui",
+    tagline: "save and restore workspace sessions per directory",
+    sections: [
+      {
+        label: "session management",
+        keys: [
+          ["<leader>ws", "save current session", "n"],
+          ["<leader>wr", "restore session for this directory", "n"],
+        ]
+      },
+      {
+        label: "tip",
+        tip: "Sessions are saved per working directory.\nAuto-restore is OFF — you restore manually with <leader>wr.\n\nWhat gets saved:\n  - open buffers\n  - splits and their layout\n  - tab pages\n  - current working directory\n\nUseful workflow: <leader>ws before closing, <leader>wr when returning."
+      },
+    ]
+  },
+
+  {
+    name: "nvim-treesitter",
+    icon: "⌬",
+    cat: "ui",
+    tag: "ui",
+    tagline: "syntax parser — powers highlighting, folding, and more",
+    sections: [
+      {
+        label: "commands",
+        keys: [
+          [":TSInstall <lang>", "install parser for a language", "c"],
+          [":TSInstallInfo", "list all parsers — installed vs available", "c"],
+          [":TSUpdate", "update all installed parsers", "c"],
+          [":TSBufToggle highlight", "toggle syntax highlighting", "c"],
+          [":InspectTree", "show raw syntax tree of current file", "c"],
+          [":Inspect", "show highlight group under cursor", "c"],
+        ]
+      },
+      {
+        label: "what treesitter does for you (background)",
+        tip: "Treesitter runs silently. It powers:\n\n  Syntax highlighting  →  accurate, semantic colors\n  Smart indent         →  correct indent when pressing o or =\n  Comment context      →  knows JSX vs JS in same file\n  Autopairs            →  knows when you're inside a string\n  Folding (nvim-ufo)   →  function/class boundaries\n  Autotag              →  auto-close and rename HTML tags\n\nInstalled parsers include: js, ts, go, python, lua,\nhtml, css, rust, json, yaml, bash, c, cpp and more."
+      },
+    ]
+  },
+
+  {
+    name: "snacks.nvim (dashboard + input)",
+    icon: "◇",
+    cat: "ui",
+    tag: "ui",
+    tagline: "startup dashboard, better input popup, image preview",
+    sections: [
+      {
+        label: "tip",
+        tip: "Dashboard shows on startup with your profile picture.\nNo keybinds — just visual.\n\nInput: vim.ui.input() is replaced with a cleaner popup.\nYou'll see this when renaming files (LSP rename, snacks rename).\n\nImage preview: inline images in markdown buffers\n(requires ImageMagick installed)."
+      },
+    ]
+  },
+
+  {
+    name: "nvim-colorizer",
+    icon: "◑",
+    cat: "ui",
+    tag: "ui",
+    tagline: "render hex colors inline in the buffer",
+    sections: [
+      {
+        label: "automatic",
+        tip: "Active in: HTML, CSS, JS, TS, Vue, Svelte, Astro, TOML.\nHex codes like #fb4934 render with a colored background automatically.\nAlso handles Tailwind class names via LSP (shows the actual color).\nNo keybinds — just open a supported file."
+      },
+    ]
+  },
+
+  {
+    name: "lualine.nvim",
+    icon: "▬",
+    cat: "ui",
+    tag: "ui",
+    tagline: "statusline at the bottom",
+    sections: [
+      {
+        label: "what it shows",
+        tip: "Left side:   mode icon  →  git branch  →  diff stats\nCenter:      filename\nRight side:  lazy update count  →  filetype\n\nDiff stats show:  +added  ~changed  -removed  (from HEAD)\n\nMode colors (custom gruvbox theme):\n  NORMAL  →  gray\n  INSERT  →  white/bright\n  VISUAL  →  purple\n  REPLACE →  pink\n  COMMAND →  yellow"
+      },
+    ]
+  },
+
+  {
+    name: "showkeys.nvim",
+    icon: "⌦",
+    cat: "ui",
+    tag: "ui",
+    tagline: "displays keypresses on screen",
+    sections: [
+      {
+        label: "toggle",
+        keys: [
+          [":ShowkeysToggle", "toggle keypress display on/off", "c"],
+        ]
+      },
+      {
+        label: "tip",
+        tip: "Shows up to 3 recent keypresses at bottom-center of screen.\nAuto-starts 100ms after Neovim opens.\nUseful for screencasts or when learning new keybinds."
+      },
+    ]
+  },
+
+  {
+    name: "gruvbox.nvim",
+    icon: "■",
+    cat: "ui",
+    tag: "ui",
+    tagline: "your active colorscheme",
+    sections: [
+      {
+        label: "config location",
+        tip: "Set in:  lua/current-theme.lua\n         vim.cmd('colorscheme gruvbox')\n\nConfigured in:  lua/bob/plugins/colorscheme.lua\n\nSettings you have:\n  transparent_mode = true   →  no background, uses terminal bg\n  bold = true               →  bold keywords\n  italic = false            →  no italic (cleaner look)\n  contrast = ''             →  medium contrast\n                               (options: 'hard', 'soft', '')\n\nTo change contrast: edit the contrast field and :source %"
+      },
+    ]
+  },
+];
+
+let activeFilter = 'all';
+let searchVal = '';
+let openSections = new Set();
+
+function badgeClass(cat) {
+  return { file:'badge-file', edit:'badge-edit', lsp:'badge-lsp', git:'badge-git', ui:'badge-ui', nav:'badge-nav', win:'badge-win' }[cat] || 'badge-ui';
+}
+
+function catLabel(cat) {
+  return { file:'files', edit:'editing', lsp:'lsp', git:'git', ui:'ui', nav:'navigation', win:'windows' }[cat] || cat;
+}
+
+function esc(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderSections(sections) {
+  return sections.map(s => {
+    let html = '';
+    if (s.label) html += `<div class="block-label">${s.label}</div>`;
+    if (s.keys) {
+      html += s.keys.map(([k, d, mode]) =>
+        `<div class="kb"><kbd>${esc(k)}</kbd><span class="kb-desc">${esc(d)}</span>${mode ? `<span class="kb-mode">${mode}</span>` : ''}</div>`
+      ).join('');
+    }
+    if (s.workflow) {
+      html += `<div class="workflow">${s.workflow.map((step, i) =>
+        `<div class="workflow-step"><div class="step-num">${i+1}</div><div class="step-text">${step}</div></div>`
+      ).join('')}</div>`;
+    }
+    if (s.tip) {
+      html += `<div class="tip ${s.tipClass||''}">${s.tip.replace(/\n/g,'<br>').replace(/<kbd>(.*?)<\/kbd>/g,'<kbd>$1</kbd>')}</div>`;
+    }
+    return `<div class="block">${html}</div>`;
+  }).join('');
+}
+
+function render() {
+  const container = document.getElementById('main');
+  const q = searchVal.toLowerCase();
+
+  const filtered = data.filter(p => {
+    const catMatch = activeFilter === 'all' || p.cat === activeFilter;
+    if (!catMatch) return false;
+    if (!q) return true;
+    const inName = p.name.toLowerCase().includes(q);
+    const inTag = p.tagline.toLowerCase().includes(q);
+    const inSections = p.sections.some(s => {
+      const inLabel = s.label && s.label.toLowerCase().includes(q);
+      const inKeys = s.keys && s.keys.some(([k,d]) => k.toLowerCase().includes(q) || d.toLowerCase().includes(q));
+      const inTip = s.tip && s.tip.toLowerCase().includes(q);
+      return inLabel || inKeys || inTip;
+    });
+    return inName || inTag || inSections;
+  });
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="no-results">◌<span>no results for "${searchVal}"</span></div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map((p, i) => {
+    const id = `sec-${i}`;
+    const isOpen = openSections.has(p.name) || q.length > 0;
+    return `<div class="section">
+      <div class="section-header" onclick="toggleSection('${p.name}','${id}')">
+        <span class="section-icon">${p.icon}</span>
+        <div style="flex:1;min-width:0">
+          <div class="section-name">${p.name}</div>
+          <div class="section-tagline">${p.tagline}</div>
+        </div>
+        <span class="section-badge ${badgeClass(p.cat)}">${catLabel(p.cat)}</span>
+        <span class="chevron ${isOpen?'open':''}" id="chev-${p.name.replace(/\s/g,'_')}">▶</span>
+      </div>
+      <div class="section-body ${isOpen?'open':''}" id="${id}">
+        ${renderSections(p.sections)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSection(name, id) {
+  const body = document.getElementById(id);
+  const chev = document.getElementById('chev-' + name.replace(/\s/g,'_'));
+  const isOpen = body.classList.contains('open');
+  if (isOpen) { body.classList.remove('open'); chev.classList.remove('open'); openSections.delete(name); }
+  else { body.classList.add('open'); chev.classList.add('open'); openSections.add(name); }
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  searchVal = e.target.value;
+  render();
+});
+
+document.getElementById('tabs').addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  activeFilter = tab.dataset.cat;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
