@@ -145,6 +145,7 @@ section "6 / 10  Installing apps and tools..."
 
 sudo pacman -S --needed --noconfirm \
     base-devel \
+    keyd \
     libx11 \
     libxft \
     libxinerama \
@@ -414,6 +415,7 @@ xdg-user-dirs-update 2>/dev/null || true
 ok "xdg user dirs updated"
 
 sudo systemctl enable bluetooth 2>/dev/null && ok "Bluetooth enabled." || true
+sudo systemctl enable --now keyd
 
 # ----------------------------------------------------------------
 # DONE
