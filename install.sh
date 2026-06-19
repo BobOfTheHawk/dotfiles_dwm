@@ -38,7 +38,7 @@ fi
 # ----------------------------------------------------------------
 # 1. DETECT GPU
 # ----------------------------------------------------------------
-section "1 / 10  Detecting GPU..."
+section "1 / 11  Detecting GPU..."
 
 GPU_PACKAGES=""
 GPU_INFO=$(lspci 2>/dev/null | grep -i "vga\|3d\|display" || echo "unknown")
@@ -67,7 +67,7 @@ fi
 # ----------------------------------------------------------------
 # 2. XORG + GPU
 # ----------------------------------------------------------------
-section "2 / 10  Installing Xorg + GPU drivers..."
+section "2 / 11  Installing Xorg + GPU drivers..."
 
 sudo pacman -S --needed --noconfirm \
     xorg-server \
@@ -87,7 +87,7 @@ ok "Xorg + GPU done."
 # ----------------------------------------------------------------
 # 3. AUDIO
 # ----------------------------------------------------------------
-section "3 / 10  Installing audio (PipeWire)..."
+section "3 / 11  Installing audio (PipeWire)..."
 
 sudo pacman -S --needed --noconfirm \
     pipewire \
@@ -104,7 +104,7 @@ ok "Audio done."
 # ----------------------------------------------------------------
 # 4. NETWORK
 # ----------------------------------------------------------------
-section "4 / 10  Installing network..."
+section "4 / 11  Installing network..."
 
 sudo pacman -S --needed --noconfirm \
     networkmanager \
@@ -122,7 +122,7 @@ ok "Network done."
 # ----------------------------------------------------------------
 # 5. FONTS
 # ----------------------------------------------------------------
-section "5 / 10  Installing fonts..."
+section "5 / 11  Installing fonts..."
 
 # ttf-jetbrains-mono-nerd is required — kitty.conf and zed/settings.json
 # both use "JetBrainsMono Nerd Font". The non-nerd version will NOT
@@ -141,7 +141,7 @@ ok "Fonts done."
 # ----------------------------------------------------------------
 # 6. APPS + TOOLS
 # ----------------------------------------------------------------
-section "6 / 10  Installing apps and tools..."
+section "6 / 11  Installing apps and tools..."
 
 sudo pacman -S --needed --noconfirm \
     base-devel \
@@ -202,7 +202,7 @@ ok "Apps done."
 # ----------------------------------------------------------------
 # 7. AUR (yay + AUR packages)
 # ----------------------------------------------------------------
-section "7 / 10  Installing AUR packages..."
+section "7 / 11  Installing AUR packages..."
 
 # Install yay if missing
 if ! command -v yay &>/dev/null; then
@@ -227,7 +227,7 @@ ok "AUR packages done."
 # ----------------------------------------------------------------
 # 8. BUILD DWM + SLSTATUS
 # ----------------------------------------------------------------
-section "8 / 10  Building dwm + slstatus..."
+section "8 / 11  Building dwm + slstatus..."
 
 # --- dwm ---
 DWM_DIR="$HOME_DIR/dwm"
@@ -286,7 +286,7 @@ cd "$REPO"
 # ----------------------------------------------------------------
 # 9. DOTFILES — home files
 # ----------------------------------------------------------------
-section "9 / 10  Copying dotfiles..."
+section "9 / 11  Copying dotfiles..."
 
 # .xinitrc + .Xresources
 cp "$REPO/home/.xinitrc"    "$HOME_DIR/.xinitrc"
@@ -325,7 +325,7 @@ fi
 # ----------------------------------------------------------------
 # 10. DOTFILES — XDG config files
 # ----------------------------------------------------------------
-section "10 / 10  Copying XDG configs..."
+section "10 / 11  Copying XDG configs..."
 
 # picom
 mkdir -p "$HOME_DIR/.config/picom"
@@ -377,6 +377,42 @@ cp -r "$REPO/config/yazi/flavors/catppuccin-mocha.yazi"  "$HOME_DIR/.config/yazi
 ok "yazi (yazi.toml + theme.toml + gruvbox-dark + catppuccin-mocha flavors)"
 
 # ----------------------------------------------------------------
+# 11. KEYD — custom keyboard remapping
+# ----------------------------------------------------------------
+section "11 / 11  Configuring keyd (custom keymap)..."
+
+# keyd is a kernel-level (evdev) key remapper — works identically in
+# dwm, TTY, or anywhere else, unlike xmodmap/.xinitrc (X11-only).
+#
+# Layout shipped here:
+#   Caps Lock (tap)      -> Esc
+#   Left Alt  (tap)      -> normal Alt (dwm bindings untouched)
+#   Left Alt  (hold) + jkuinmhlyop, -> ( ) [ ] { } - = \ | " '
+#   Right Alt                       -> completely untouched
+#
+# This moves the C/shell/Neovim symbol cluster ( ) [ ] { } - _ = + \ ' "
+# off the right pinky and onto the right hand's index/middle row.
+
+KEYD_CONF="/etc/keyd/default.conf"
+KEYD_SRC="$REPO/etc/keyd/default.conf"
+
+sudo mkdir -p /etc/keyd
+
+if [ -f "$KEYD_CONF" ] && ! cmp -s "$KEYD_SRC" "$KEYD_CONF"; then
+    info "Existing $KEYD_CONF differs from repo version — backing up to $KEYD_CONF.bak"
+    sudo cp "$KEYD_CONF" "$KEYD_CONF.bak"
+fi
+
+sudo cp "$KEYD_SRC" "$KEYD_CONF"
+ok "keyd config installed -> $KEYD_CONF"
+
+sudo systemctl enable --now keyd
+sudo systemctl restart keyd
+ok "keyd enabled + restarted (picks up the new config immediately)"
+
+note "Test live with: keyd monitor"
+
+# ----------------------------------------------------------------
 # MISC SETUP
 # ----------------------------------------------------------------
 
@@ -415,7 +451,6 @@ xdg-user-dirs-update 2>/dev/null || true
 ok "xdg user dirs updated"
 
 sudo systemctl enable bluetooth 2>/dev/null && ok "Bluetooth enabled." || true
-sudo systemctl enable --now keyd
 
 # ----------------------------------------------------------------
 # DONE
@@ -439,6 +474,14 @@ echo "  ~/.xinitrc          → xrandr line (monitor output + resolution)"
 echo "  ~/slstatus/config.h → network interface was auto-detected as: $NET_IFACE"
 echo "                        if wrong, edit and run: cd ~/slstatus && sudo make clean install"
 echo "  ~/dwm/config.h      → home paths were auto-patched to: $HOME_DIR"
+echo ""
+echo -e "${YELLOW}  ⚠  Keyboard remap (keyd):${NC}"
+echo ""
+echo "  Caps Lock  (tap)        → Esc"
+echo "  Left Alt   (hold) + jkuinmhlyop, → ( ) [ ] { } - = \\ | \" '"
+echo "  Edit:    sudo nvim /etc/keyd/default.conf"
+echo "  Apply:   sudo systemctl restart keyd"
+echo "  Test:    keyd monitor"
 echo ""
 echo "  NVIDIA: after first boot run 'nvidia-smi' to confirm the"
 echo "  kernel module loaded. If it fails: journalctl -b | grep -i nvidia"
