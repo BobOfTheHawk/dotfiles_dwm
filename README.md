@@ -27,6 +27,7 @@ Then reboot and type `startx` from the TTY.
 | Compositor | picom |
 | Clipboard | clipmenu |
 | Screenshots | maim + xclip |
+| Key remapping | keyd (kernel-level, evdev) |
 
 ---
 
@@ -37,6 +38,7 @@ Then reboot and type `startx` from the TTY.
 | [docs/dwm.md](docs/dwm.md) | All keybinds, layouts, tags, mouse, bar |
 | [docs/nvim.md](docs/nvim.md) | Full Neovim guide — plugins, keybinds, LSP |
 | [docs/zshrc.md](docs/zshrc.md) | Aliases, fzf functions, shell keybinds |
+| [docs/keyd.md](docs/keyd.md) | Caps→Esc, Alt-hold symbol layer, editing/testing |
 
 ---
 
