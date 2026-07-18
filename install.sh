@@ -1,15 +1,22 @@
-#!/bin/bash
+    #!/bin/bash
 # ================================================================
 #  dotfiles installer — bobofthehawk
-#  Installs dwm, slstatus, and all configs from scratch.
-#  Run: bash install.sh
 # ================================================================
 
-set -e
+set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HOME_DIR="$HOME"
 USERNAME=$(whoami)
+
+# ----------------------------------------------------------------
+# LOGGING — every run writes a full transcript to disk, so a failure
+# can be diagnosed later even if the terminal scrollback is gone.
+# ----------------------------------------------------------------
+LOG_DIR="$HOME_DIR/.local/share/dotfiles-install-logs"
+mkdir -p "$LOG_DIR"
+LOGFILE="$LOG_DIR/install-$(date +%Y%m%d-%H%M%S).log"
+exec > >(tee -a "$LOGFILE") 2>&1
 
 # colors
 GREEN='\033[0;32m'
@@ -19,15 +26,37 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+CURRENT_SECTION="startup"
+
 ok()      { echo -e "${GREEN}  ✓ $1${NC}"; }
 info()    { echo -e "${YELLOW}  → $1${NC}"; }
 err()     { echo -e "${RED}  ✗ $1${NC}"; exit 1; }
-section() { echo -e "\n${BLUE}══════════════════════════════════════════\n  $1\n══════════════════════════════════════════${NC}"; }
+section() { CURRENT_SECTION="$1"; echo -e "\n${BLUE}══════════════════════════════════════════\n  $1\n══════════════════════════════════════════${NC}"; }
 note()    { echo -e "${CYAN}  ⚑ $1${NC}"; }
+
+# Fires on any command that fails unexpectedly (not on our own err() calls,
+# since those exit explicitly). Reports exactly where things broke.
+on_error() {
+    local exit_code=$?
+    echo -e "\n${RED}══════════════════════════════════════════"
+    echo    "  ✗ INSTALL FAILED"
+    echo -e "══════════════════════════════════════════${NC}"
+    echo -e "${RED}  Section:${NC}   $CURRENT_SECTION"
+    echo -e "${RED}  Line:${NC}      $1"
+    echo -e "${RED}  Command:${NC}   $2"
+    echo -e "${RED}  Exit code:${NC} $exit_code"
+    echo ""
+    echo "  Full log saved to: $LOGFILE"
+    echo "  Most steps are idempotent — fix the issue above and re-run:"
+    echo "    bash install.sh"
+}
+trap 'on_error "$LINENO" "$BASH_COMMAND"' ERR
 
 echo ""
 echo "================================================================"
 echo "  dotfiles installer — $USERNAME"
+echo "================================================================"
+echo "  Logging full output to: $LOGFILE"
 echo "================================================================"
 
 # must not run as root
@@ -488,4 +517,6 @@ echo "  kernel module loaded. If it fails: journalctl -b | grep -i nvidia"
 echo ""
 echo "  GPU detected: $GPU_INFO"
 echo "================================================================"
+echo ""
+echo "  Full install log saved to: $LOGFILE"
 echo ""
