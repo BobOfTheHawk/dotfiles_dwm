@@ -1,4 +1,4 @@
-    #!/bin/bash
+#!/bin/bash
 # ================================================================
 #  dotfiles installer — bobofthehawk
 # ================================================================
@@ -183,6 +183,8 @@ sudo pacman -S --needed --noconfirm \
     dmenu \
     kitty \
     qutebrowser \
+    python-adblock \
+    zenity \
     maim \
     xclip \
     clipmenu \
@@ -404,6 +406,23 @@ cp "$REPO/config/yazi/theme.toml" "$HOME_DIR/.config/yazi/theme.toml"
 cp -r "$REPO/config/yazi/flavors/gruvbox-dark.yazi"      "$HOME_DIR/.config/yazi/flavors/"
 cp -r "$REPO/config/yazi/flavors/catppuccin-mocha.yazi"  "$HOME_DIR/.config/yazi/flavors/"
 ok "yazi (yazi.toml + theme.toml + gruvbox-dark + catppuccin-mocha flavors)"
+
+# qutebrowser — config.py, quickmarks, bookmarks, autoconfig, userscripts
+mkdir -p "$HOME_DIR/.config/qutebrowser/userscripts"
+mkdir -p "$HOME_DIR/.config/qutebrowser/bookmarks"
+
+cp "$REPO/config/qutebrowser/config.py" "$HOME_DIR/.config/qutebrowser/config.py"
+ok "qutebrowser config.py (resolves \$HOME at runtime, no patching needed)"
+
+cp "$REPO/config/qutebrowser/quickmarks"        "$HOME_DIR/.config/qutebrowser/quickmarks"
+cp "$REPO/config/qutebrowser/bookmarks/urls"    "$HOME_DIR/.config/qutebrowser/bookmarks/urls"
+cp "$REPO/config/qutebrowser/autoconfig.yml"    "$HOME_DIR/.config/qutebrowser/autoconfig.yml"
+
+cp "$REPO/config/qutebrowser/userscripts/highlight"      "$HOME_DIR/.config/qutebrowser/userscripts/highlight"
+cp "$REPO/config/qutebrowser/userscripts/highlight-next" "$HOME_DIR/.config/qutebrowser/userscripts/highlight-next"
+cp "$REPO/config/qutebrowser/userscripts/highlight-prev" "$HOME_DIR/.config/qutebrowser/userscripts/highlight-prev"
+chmod +x "$HOME_DIR/.config/qutebrowser/userscripts/"*
+ok "qutebrowser (quickmarks + bookmarks + autoconfig + userscripts, made executable)"
 
 # ----------------------------------------------------------------
 # 11. KEYD — custom keyboard remapping
