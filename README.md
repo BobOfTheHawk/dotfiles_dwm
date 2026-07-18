@@ -20,7 +20,7 @@ Then reboot and type `startx` from the TTY.
 | Status bar | slstatus (compiled from source) |
 | Terminal | kitty |
 | Shell | zsh + zinit + Powerlevel10k |
-| Browser | qutebrowser |
+| Browser | qutebrowser (config tracked in `config/qutebrowser/`, mirrored from [BobOfTheHawk/qutebrowser](https://github.com/BobOfTheHawk/qutebrowser)) |
 | Launcher | dmenu |
 | File manager | yazi (TUI) / Thunar (GUI, floats) |
 | Editor | Neovim (lazy.nvim) |
@@ -43,6 +43,8 @@ Then reboot and type `startx` from the TTY.
 ---
 
 ## After install
+
+Every run writes a full transcript to `~/.local/share/dotfiles-install-logs/install-<timestamp>.log` — check there first if a step fails; `install.sh` will also print the exact section, line, and command that broke on any failure.
 
 Adjust these for your machine:
 
