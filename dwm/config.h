@@ -79,9 +79,9 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_c,                     spawn,          {.v = clipmenucmd } },              /* Super+C:           clipboard history */
 
 	/* --- screenshots --- */
-	{ 0,                            XK_Print,                 spawn,          SHCMD("f=HOME_PLACEHOLDER/Screenshots/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png; maim $f && xclip -selection clipboard -t image/png < $f") },             /* Print:             full screenshot */
-	{ MODKEY|ShiftMask,             XK_s,                     spawn,          SHCMD("f=HOME_PLACEHOLDER/Screenshots/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png; maim -s $f && xclip -selection clipboard -t image/png < $f") },         /* Super+Shift+S:     region screenshot */
-
+	{ 0,                XK_Print, spawn, SHCMD("pkill clipmenud; f=HOME_PLACEHOLDER/Screenshots/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png; maim $f && xclip -selection clipboard -t image/png < $f; clipmenud &") },
+	{ MODKEY|ShiftMask, XK_s,     spawn, SHCMD("pkill clipmenud; f=HOME_PLACEHOLDER/Screenshots/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png; maim -s $f && xclip -selection clipboard -t image/png < $f; clipmenud &") },
+	
 	/* --- volume --- */
 	{ 0,                            XF86XK_AudioRaiseVolume,  spawn,          SHCMD("pactl set-sink-volume @DEFAULT_SINK@ +5%") },
 	{ 0,                            XF86XK_AudioLowerVolume,  spawn,          SHCMD("pactl set-sink-volume @DEFAULT_SINK@ -5%") },
